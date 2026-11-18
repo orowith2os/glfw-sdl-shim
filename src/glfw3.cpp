@@ -10,6 +10,7 @@
 #include <string_view>
 #include <atomic>
 #include <thread>
+#include <print>
 
 struct ShimGlobalState {
   bool initialized;
@@ -293,6 +294,31 @@ glfwGetError (const char **description)
     }
 
   return last_err_code;
+}
+
+void
+glfwInitAllocator (const GLFWallocator *)
+{
+  std::println ("Silently ignoring glfwInitAllocator, not compatible with SDL...");
+}
+
+int
+glfwGetPlatform ()
+{
+  return state.selected_glfw_platform;
+}
+
+int
+glfwPlatformSupported (int platform)
+{
+  switch (platform)
+    {
+    case GLFW_PLATFORM_WAYLAND:
+      return GLFW_TRUE;
+    // TODO
+    default:
+      return GLFW_FALSE;
+    }
 }
 
 GLFWerrorfun
