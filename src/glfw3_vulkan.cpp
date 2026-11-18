@@ -3,41 +3,58 @@
 
 #include "glfw3.h"
 #include "glfw_helpers.hpp"
+#include "glfw_window.hpp"
 
 #include <SDL3/SDL_vulkan.h>
 
 #include <print>
 
-VkResult
-glfwCreateWindowSurface (VkInstance instance,
-                         GLFWwindow *window,
-                         const VkAllocationCallbacks *allocator,
-                         VkSurfaceKHR *surface)
+const char **
+glfwGetRequiredInstanceExtensions (uint32_t* count)
+{
+  if (!state.vulkan_loaded)
+    do_error_things (GLFW_NOT_INITIALIZED, "Vulkan wasn't loaded.");
+
+  auto exts = SDL_Vulkan_GetInstanceExtensions (count);
+
+  if (!exts)
+    do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
+
+  return (const char**)exts;
+}
+
+void
+glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
 {
   // TODO
-  return VK_ERROR_UNKNOWN;
+  if (loader)
+    std::println ("Ignoring custom Vulkan loader argument. This isn't compatible, for now at least.");
+
+  if (state.vulkan_loaded)
+    return;
+
+  if (SDL_Vulkan_LoadLibrary (nullptr))
+      state.vulkan_loaded = true;
+  else
+      do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
 }
 
 int
-glfwGetPhysicalDevicePresentationSupport (VkInstance instance,
-                                          VkPhysicalDevice device,
-                                          uint32_t queuefamily)
+glfwVulkanSupported (void)
 {
-  if (!glfwVulkanSupported())
+  if (state.vulkan_loaded)
+    return GLFW_TRUE;
+
+  if (SDL_Vulkan_LoadLibrary (nullptr))
     {
-      do_error_things (GLFW_API_UNAVAILABLE, "Vulkan doesn't appear to be supported.");
-      return GLFW_FALSE;
+      SDL_Vulkan_UnloadLibrary ();
+      return GLFW_TRUE;
     }
-
-  glfwInitVulkanLoader (nullptr);
-
-  if (!SDL_Vulkan_GetPresentationSupport (instance, device, queuefamily))
+  else
     {
       do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
       return GLFW_FALSE;
     }
-  else
-    return GLFW_TRUE;
 }
 
 GLFWvkproc
@@ -63,35 +80,33 @@ glfwGetInstanceProcAddress (VkInstance  instance,
 }
 
 int
-glfwVulkanSupported (void)
+glfwGetPhysicalDevicePresentationSupport (VkInstance instance,
+                                          VkPhysicalDevice device,
+                                          uint32_t queuefamily)
 {
-  if (state.vulkan_loaded)
-    return GLFW_TRUE;
-
-  if (SDL_Vulkan_LoadLibrary (nullptr))
-    {
-      SDL_Vulkan_UnloadLibrary ();
-      return GLFW_TRUE;
-    }
-  else
+  if (!SDL_Vulkan_GetPresentationSupport (instance, device, queuefamily))
     {
       do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
       return GLFW_FALSE;
     }
+  else
+    return GLFW_TRUE;
 }
 
-void
-glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
+VkResult
+glfwCreateWindowSurface (VkInstance instance,
+                         GLFWwindow *window,
+                         const VkAllocationCallbacks *allocator,
+                         VkSurfaceKHR *surface)
 {
-  // TODO
-  if (loader)
-    std::println ("Ignoring custom Vulkan loader argument. This isn't compatible, for now at least.");
-
-  if (state.vulkan_loaded)
-    return;
-
-  if (SDL_Vulkan_LoadLibrary (nullptr))
-      state.vulkan_loaded = true;
-  else
+  if (!SDL_Vulkan_CreateSurface(window->sdl_window,
+                                instance,
+                                allocator,
+                                surface))
+    {
       do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
+      return VK_ERROR_UNKNOWN;
+    }
+  else
+    return VK_SUCCESS;
 }
