@@ -20,6 +20,8 @@ configure_file(
 
 glfw_sdl_shim_sources = [
   'glfw3.cpp',
+  'glfw3_vulkan.cpp',
+  'glfw_helpers.cpp',
   'main.cpp',
 ]
 

@@ -4,7 +4,10 @@
     "runtime-version" : "25.08",
     "sdk" : "org.freedesktop.Sdk",
     "command" : "glfw-sdl-shim",
-    "finish-args" : [],
+    "finish-args" : [
+      "--socket=wayland",
+      "--device=dri"
+    ],
     "cleanup" : [
         "/include",
         "/lib/pkgconfig",

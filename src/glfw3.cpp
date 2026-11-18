@@ -1,115 +1,16 @@
 #include "glfw3.h"
+#include "config.h"
+#include "glfw_helpers.hpp"
+
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_hints.h>
-
-#include "config.h"
+#include <SDL3/SDL_vulkan.h>
 
 #include <string>
 #include <format>
-#include <optional>
-#include <string_view>
 #include <atomic>
 #include <thread>
 #include <print>
-
-struct ShimGlobalState {
-  bool initialized;
-  bool failed_sdl_init;
-  GLFWerrorfun err_callback;
-};
-
-// https://www.glfw.org/docs/3.3/intro_guide.html#error_handling
-// errors are thread-local.
-struct ShimThreadState {
-  int last_api_error;
-  std::string last_api_error_ctx;
-};
-
-static ShimGlobalState state;
-static thread_local ShimThreadState thread_state = {
-  .last_api_error = GLFW_NO_ERROR,
-  .last_api_error_ctx = "",
-};
-
-// https://www.glfw.org/docs/latest/group__errors.html
-static std::optional<std::string_view>
-err_to_string (int err)
-{
-  switch (err)
-    {
-    case GLFW_NO_ERROR:
-      return "GLFW_NO_ERROR";
-    case GLFW_NOT_INITIALIZED:
-      return "GLFW_NOT_INITIALIZED";
-    case GLFW_NO_CURRENT_CONTEXT:
-      return "GLFW_NO_CURRENT_CONTEXT";
-    case GLFW_INVALID_ENUM:
-      return "GLFW_INVALID_ENUM";
-    case GLFW_INVALID_VALUE:
-      return "GLFW_INVALID_VALUE";
-    case GLFW_OUT_OF_MEMORY:
-      return "GLFW_OUT_OF_MEMORY";
-    case GLFW_API_UNAVAILABLE:
-      return "GLFW_API_UNAVAILABLE";
-    case GLFW_VERSION_UNAVAILABLE:
-      return "GLFW_VERSION_UNAVAILABLE";
-    case GLFW_PLATFORM_ERROR:
-      return "GLFW_PLATFORM_ERROR";
-    case GLFW_FORMAT_UNAVAILABLE:
-      return "GLFW_FORMAT_UNAVAILABLE";
-    case GLFW_NO_WINDOW_CONTEXT:
-      return "GLFW_NO_WINDOW_CONTEXT";
-    case GLFW_CURSOR_UNAVAILABLE:
-      return "GLFW_CURSOR_UNAVAILABLE";
-    case GLFW_FEATURE_UNAVAILABLE:
-      return "GLFW_FEATURE_UNAVAILABLE";
-    case GLFW_FEATURE_UNIMPLEMENTED:
-      return "GLFW_FEATURE_UNIMPLEMENTED";
-    case GLFW_PLATFORM_UNAVAILABLE:
-      return "GLFW_PLATFORM_UNAVAILABLE";
-    default:
-      return std::nullopt;
-    }
-}
-
-static void
-do_error_things (int err, std::string_view ctx)
-{
-  std::string ctx_clarified;
-
-  if (!err)
-    return; // keep errors around until we actually get one, just like real GLFW
-
-  thread_state.last_api_error = err;
-  auto error_ctx = err_to_string (err);
-  if (error_ctx)
-    {
-      ctx_clarified += *error_ctx;
-      if (!ctx.empty())
-        {
-          ctx_clarified += ": ";
-          ctx_clarified += ctx;
-        }
-      else
-        ctx_clarified += ": No additional context for the error was provided.";
-    }
-  else
-    {
-      ctx_clarified += std::format ("Unknown integer value ({}), please file a bug.", err);
-      if (!ctx.empty())
-        {
-          ctx_clarified += " Additional error context: ";
-          ctx_clarified += ctx;
-        }
-      else
-        ctx_clarified += " No additional context for the error was provided.";
-    }
-
-  thread_state.last_api_error_ctx = ctx_clarified;
-
-  if (state.err_callback)
-    state.err_callback (err, thread_state.last_api_error_ctx.c_str ());
-}
 
 extern "C" {
 
@@ -132,6 +33,8 @@ glfwInit ()
   if (!err)
     {
       state.initialized = true;
+      // TODO
+      state.selected_glfw_platform = GLFW_PLATFORM_WAYLAND;
       return GLFW_TRUE;
     }
   else
@@ -273,8 +176,13 @@ glfwTerminate ()
 {
   if (!state.initialized)
     return;
+
+  if (state.vulkan_loaded)
+    SDL_Vulkan_UnloadLibrary ();
+
   if (!state.failed_sdl_init)
     SDL_QuitSubSystem (SDL_INIT_VIDEO);
+
   state.initialized = false;
 }
 
