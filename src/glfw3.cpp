@@ -1,5 +1,6 @@
 #include "glfw3.h"
 #include <SDL3/SDL_init.h>
+#include <SDL3/SDL_hints.h>
 
 #include "config.h"
 
@@ -8,10 +9,11 @@
 #include <optional>
 #include <string_view>
 #include <atomic>
+#include <thread>
 
 struct ShimGlobalState {
-  bool was_initialized;
-  // TODO: enforce main-thread-only
+  bool initialized;
+  bool failed_sdl_init;
   GLFWerrorfun err_callback;
 };
 
@@ -19,11 +21,14 @@ struct ShimGlobalState {
 // errors are thread-local.
 struct ShimThreadState {
   int last_api_error;
-  std::optional<std::string> last_api_error_ctx;
+  std::string last_api_error_ctx;
 };
 
 static ShimGlobalState state;
-static thread_local ShimThreadState thread_state;
+static thread_local ShimThreadState thread_state = {
+  .last_api_error = GLFW_NO_ERROR,
+  .last_api_error_ctx = "",
+};
 
 // https://www.glfw.org/docs/latest/group__errors.html
 static std::optional<std::string_view>
@@ -67,7 +72,7 @@ err_to_string (int err)
 }
 
 static void
-do_error_things (int err, std::optional<std::string_view> ctx)
+do_error_things (int err, std::string_view ctx)
 {
   std::string ctx_clarified;
 
@@ -79,10 +84,10 @@ do_error_things (int err, std::optional<std::string_view> ctx)
   if (error_ctx)
     {
       ctx_clarified += *error_ctx;
-      if (!ctx->empty())
+      if (!ctx.empty())
         {
           ctx_clarified += ": ";
-          ctx_clarified += *ctx;
+          ctx_clarified += ctx;
         }
       else
         ctx_clarified += ": No additional context for the error was provided.";
@@ -90,10 +95,10 @@ do_error_things (int err, std::optional<std::string_view> ctx)
   else
     {
       ctx_clarified += std::format ("Unknown integer value ({}), please file a bug.", err);
-      if (!ctx->empty())
+      if (!ctx.empty())
         {
           ctx_clarified += " Additional error context: ";
-          ctx_clarified += *ctx;
+          ctx_clarified += ctx;
         }
       else
         ctx_clarified += " No additional context for the error was provided.";
@@ -102,7 +107,7 @@ do_error_things (int err, std::optional<std::string_view> ctx)
   thread_state.last_api_error_ctx = ctx_clarified;
 
   if (state.err_callback)
-    state.err_callback (err, thread_state.last_api_error_ctx->c_str ());
+    state.err_callback (err, thread_state.last_api_error_ctx.c_str ());
 }
 
 extern "C" {
@@ -111,21 +116,21 @@ int
 glfwInit ()
 {
   int err = GLFW_NO_ERROR;
-  const char *error_ctx = nullptr;
+  const char *error_ctx = "";
 
-  if (state.was_initialized)
+  if (state.initialized)
     return GLFW_TRUE;
 
-  /* TODO */
-  if (!SDL_Init (SDL_INIT_VIDEO))
+  if (!SDL_InitSubSystem (SDL_INIT_VIDEO))
     {
       error_ctx = SDL_GetError ();
+      state.failed_sdl_init = true;
       err = GLFW_PLATFORM_ERROR;
     }
 
   if (!err)
     {
-      state.was_initialized = true;
+      state.initialized = true;
       return GLFW_TRUE;
     }
   else
@@ -142,18 +147,122 @@ void
 glfwInitHint (int hint, int value)
 {
   int err = GLFW_NO_ERROR;
-  std::string ctx;
-
-  if (state.was_initialized)
-    return;
+  std::string_view ctx = "";
 
   switch (hint)
     {
-    /* TODO */
+/* Shared */
+    case GLFW_PLATFORM:
+      switch (value)
+        {
+        case GLFW_PLATFORM_WAYLAND:
+          // TODO
+        case GLFW_ANY_PLATFORM:
+          return;
+        case GLFW_PLATFORM_NULL:
+        case GLFW_PLATFORM_X11:
+        case GLFW_PLATFORM_WIN32:
+        case GLFW_PLATFORM_COCOA:
+          // not supported yet
+          err = GLFW_INVALID_VALUE;
+          ctx = "Platforms other than Wayland aren't supported yet";
+          break;
+        default:
+          err = GLFW_INVALID_VALUE;
+          break;
+        }
+      break;
+    case GLFW_JOYSTICK_HAT_BUTTONS:
+      switch (value)
+        {
+        case GLFW_TRUE:
+        case GLFW_FALSE:
+          // TODO?
+          return;
+        default:
+          err = GLFW_INVALID_VALUE;
+          break;
+        }
+      break;
+    case GLFW_ANGLE_PLATFORM_TYPE:
+      switch (value)
+        {
+        case GLFW_ANGLE_PLATFORM_TYPE_NONE:
+          return;
+        case GLFW_ANGLE_PLATFORM_TYPE_OPENGL:
+        case GLFW_ANGLE_PLATFORM_TYPE_OPENGLES:
+        case GLFW_ANGLE_PLATFORM_TYPE_D3D9:
+        case GLFW_ANGLE_PLATFORM_TYPE_D3D11:
+        case GLFW_ANGLE_PLATFORM_TYPE_VULKAN:
+        case GLFW_ANGLE_PLATFORM_TYPE_METAL:
+          err = GLFW_INVALID_VALUE;
+          ctx = "ANGLE isn't supported yet";
+          break;
+        default:
+          err = GLFW_INVALID_VALUE;
+          break;
+        }
+      break;
+
+/* macOS */
+    case GLFW_COCOA_CHDIR_RESOURCES:
+    case GLFW_COCOA_MENUBAR:
+      switch (value)
+        {
+        case GLFW_TRUE:
+        case GLFW_FALSE:
+        default:
+          return;
+        }
+      break;
+
+/* Wayland */
+    case GLFW_WAYLAND_LIBDECOR:
+      switch (value)
+        {
+        // This is a bit weird. ALLOW is probably what the GLFW dev intended.
+        case GLFW_WAYLAND_PREFER_LIBDECOR:
+           if (!SDL_SetHint (SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "1"))
+             {
+               err = GLFW_PLATFORM_ERROR;
+               ctx = SDL_GetError ();
+             }
+          return;
+        case GLFW_WAYLAND_DISABLE_LIBDECOR:
+           if (!SDL_SetHint (SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "0"))
+             {
+               err = GLFW_PLATFORM_ERROR;
+               ctx = SDL_GetError ();
+             }
+          return;
+        default:
+          err = GLFW_INVALID_VALUE;
+          break;
+        }
+      break;
+
+/* X11 */
+    case GLFW_X11_XCB_VULKAN_SURFACE:
+      switch (value)
+        {
+        case GLFW_TRUE:
+        case GLFW_FALSE:
+          // TODO
+          return;
+        default:
+          err = GLFW_INVALID_VALUE;
+          break;
+        }
+      break;
+
     default:
       err = GLFW_INVALID_ENUM;
       ctx = "Unrecognized init hint";
+      break;
     }
+
+  if (err == GLFW_INVALID_VALUE && ctx.empty())
+    ctx = "Invalid value for hint";
 
   do_error_things (err, ctx);
 }
@@ -161,10 +270,14 @@ glfwInitHint (int hint, int value)
 void
 glfwTerminate ()
 {
-  SDL_Quit ();
-  state.was_initialized = false;
+  if (!state.initialized)
+    return;
+  if (!state.failed_sdl_init)
+    SDL_QuitSubSystem (SDL_INIT_VIDEO);
+  state.initialized = false;
 }
 
+// The original GLFW method resets the error on read.
 int
 glfwGetError (const char **description)
 {
@@ -173,8 +286,8 @@ glfwGetError (const char **description)
 
   if (description)
     {
-      if (last_err_code)
-        *description = thread_state.last_api_error_ctx->c_str ();
+      if (last_err_code && !thread_state.last_api_error_ctx.empty())
+        *description = thread_state.last_api_error_ctx.c_str ();
       else
         *description = nullptr;
     }

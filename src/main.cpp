@@ -2,7 +2,8 @@
 #include "glfw3.h"
 
 int main() {
-	std::println("glfw initialized: {}", glfwInit());
+	std::println ("glfw initialized: {}", glfwInit ());
 
+    glfwTerminate ();
 	return 0;
 }
