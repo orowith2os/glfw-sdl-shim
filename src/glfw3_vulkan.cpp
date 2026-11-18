@@ -8,6 +8,38 @@
 
 #include <print>
 
+VkResult
+glfwCreateWindowSurface (VkInstance instance,
+                         GLFWwindow *window,
+                         const VkAllocationCallbacks *allocator,
+                         VkSurfaceKHR *surface)
+{
+  // TODO
+  return VK_ERROR_UNKNOWN;
+}
+
+int
+glfwGetPhysicalDevicePresentationSupport (VkInstance instance,
+                                          VkPhysicalDevice device,
+                                          uint32_t queuefamily)
+{
+  if (!glfwVulkanSupported())
+    {
+      do_error_things (GLFW_API_UNAVAILABLE, "Vulkan doesn't appear to be supported.");
+      return GLFW_FALSE;
+    }
+
+  glfwInitVulkanLoader (nullptr);
+
+  if (!SDL_Vulkan_GetPresentationSupport (instance, device, queuefamily))
+    {
+      do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
+      return GLFW_FALSE;
+    }
+  else
+    return GLFW_TRUE;
+}
+
 GLFWvkproc
 glfwGetInstanceProcAddress (VkInstance  instance,
                             const char *procname)
@@ -51,6 +83,7 @@ glfwVulkanSupported (void)
 void
 glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
 {
+  // TODO
   if (loader)
     std::println ("Ignoring custom Vulkan loader argument. This isn't compatible, for now at least.");
 
