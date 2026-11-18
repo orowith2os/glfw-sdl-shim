@@ -228,14 +228,14 @@ glfwInitHint (int hint, int value)
                err = GLFW_PLATFORM_ERROR;
                ctx = SDL_GetError ();
              }
-          return;
+          break;
         case GLFW_WAYLAND_DISABLE_LIBDECOR:
            if (!SDL_SetHint (SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "0"))
              {
                err = GLFW_PLATFORM_ERROR;
                ctx = SDL_GetError ();
              }
-          return;
+          break;
         default:
           err = GLFW_INVALID_VALUE;
           break;
