@@ -1,0 +1,37 @@
+{
+    "id" : "gay.oro.glfw-sdl-shim",
+    "runtime" : "org.freedesktop.Platform",
+    "runtime-version" : "25.08",
+    "sdk" : "org.freedesktop.Sdk",
+    "command" : "glfw-sdl-shim",
+    "finish-args" : [],
+    "cleanup" : [
+        "/include",
+        "/lib/pkgconfig",
+        "/man",
+        "/share/doc",
+        "/share/gtk-doc",
+        "/share/man",
+        "/share/pkgconfig",
+        "*.la",
+        "*.a"
+    ],
+    "modules" : [
+        {
+            "name" : "glfw-sdl-shim",
+            "buildsystem" : "meson",
+            "sources" : [
+                {
+                    "type" : "dir",
+                    "path" : "."
+                }
+            ],
+            "config-opts" : [
+                "--libdir=lib"
+            ]
+        }
+    ],
+    "build-options" : {
+        "env" : {        }
+    }
+}
