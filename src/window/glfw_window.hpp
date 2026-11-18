@@ -1,0 +1,37 @@
+#pragma once
+
+#include "helpers/glfw_helpers.hpp"
+#include <SDL3/SDL_video.h>
+
+extern "C" {
+
+struct WindowHints
+{
+  SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE |
+                          SDL_WINDOW_HIGH_PIXEL_DENSITY;
+
+  // GL and framebuffer BS
+  int red_bits = 8;
+  int green_bits = 8;
+  int blue_bits = 8;
+  int alpha_bits = 8;
+  int depth_bits = 24;
+  int stencil_bits = 8;
+  int samples = 0;
+  bool srgb_capable = false;
+  bool doublebuffer = true;
+
+  std::string wayland_app_id;
+};
+
+struct GLFWwindow {
+  // A window and GL context are 1-1 in GLFW,
+  // you can't do multiple.
+  SDL_Window *sdl_window;
+  SDL_GLContext gl_context;
+  bool should_close;
+};
+
+} // extern "C"
+
+inline WindowHints hints;

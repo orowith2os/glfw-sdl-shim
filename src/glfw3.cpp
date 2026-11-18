@@ -1,6 +1,6 @@
 #include "glfw3.h"
 #include "config.h"
-#include "glfw_helpers.hpp"
+#include "helpers/glfw_helpers.hpp"
 
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_hints.h>
@@ -11,6 +11,9 @@
 #include <atomic>
 #include <thread>
 #include <print>
+
+// TODO: handle threading here. Can't use SDL here
+// since we might not have SDL initialized.
 
 extern "C" {
 
@@ -28,6 +31,12 @@ glfwInit ()
       error_ctx = SDL_GetError ();
       state.failed_sdl_init = true;
       err = GLFW_PLATFORM_ERROR;
+    }
+
+  if (!err && !glfw_init_events ())
+    {
+      err = GLFW_PLATFORM_ERROR;
+      error_ctx = "Failed to register custom SDL event?";
     }
 
   if (!err)
@@ -50,6 +59,8 @@ glfwInit ()
 void
 glfwInitHint (int hint, int value)
 {
+  ASSERT_MAIN_THREAD_VOID ()
+
   int err = GLFW_NO_ERROR;
   std::string_view ctx = "";
 
@@ -177,8 +188,13 @@ glfwTerminate ()
   if (!state.initialized)
     return;
 
+  ASSERT_MAIN_THREAD_VOID ()
+
   if (state.vulkan_loaded)
-    SDL_Vulkan_UnloadLibrary ();
+    {
+      SDL_Vulkan_UnloadLibrary ();
+      state.vulkan_loaded = false;
+    }
 
   if (!state.failed_sdl_init)
     SDL_QuitSubSystem (SDL_INIT_VIDEO);
@@ -232,6 +248,8 @@ glfwPlatformSupported (int platform)
 GLFWerrorfun
 glfwSetErrorCallback (GLFWerrorfun callback)
 {
+  ASSERT_MAIN_THREAD_PTR ()
+
   GLFWerrorfun old_callback = state.err_callback;
 
   state.err_callback = callback;

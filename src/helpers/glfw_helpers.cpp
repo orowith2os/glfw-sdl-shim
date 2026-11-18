@@ -82,3 +82,16 @@ do_error_things (int err, std::string_view ctx)
   if (state.err_callback)
     state.err_callback (err, thread_state.last_api_error_ctx.c_str ());
 }
+
+int
+assert_main_thread ()
+{
+  if (!glfwInit ())
+    return GLFW_FALSE;
+  if (!SDL_IsMainThread())
+    {
+      do_error_things (GLFW_INVALID_VALUE, "Called glfwDefaultWindowHints outside of the main thread.");
+      return GLFW_FALSE;
+    }
+  return GLFW_TRUE;
+}
