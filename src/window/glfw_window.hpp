@@ -43,6 +43,7 @@ struct GLFWwindow {
   bool lock_key_mods = false;
   GLFWcursor *cursor = nullptr;
   bool focus_on_show = false;
+  GLFWscrollfun scroll_callback = nullptr;
 
   ~GLFWwindow ()
     {

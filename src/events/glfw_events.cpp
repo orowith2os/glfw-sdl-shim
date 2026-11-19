@@ -23,6 +23,14 @@ dispatch_event (SDL_Event event)
     glfw_window_dispatch_event (event.window);
   else if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
     glfw_key_dispatch_event (event.key);
+  else if (event.type == SDL_EVENT_MOUSE_WHEEL)
+    {
+      GLFWwindow *window = glfw_window_from_sdl_window_id (event.wheel.windowID);
+      if (window && window->scroll_callback)
+        window->scroll_callback (window,
+                                 static_cast<double> (event.wheel.x),
+                                 static_cast<double> (event.wheel.y));
+    }
 }
 
 static void

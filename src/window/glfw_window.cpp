@@ -124,6 +124,19 @@ glfwSetInputMode (GLFWwindow *window, int mode, int value)
   do_error_things (err, ctx);
 }
 
+GLFWscrollfun
+glfwSetScrollCallback (GLFWwindow *window, GLFWscrollfun callback)
+{
+  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_MAIN_THREAD_PTR ()
+  if (!window)
+    return nullptr;
+
+  GLFWscrollfun previous = window->scroll_callback;
+  window->scroll_callback = callback;
+  return previous;
+}
+
 GLFWkeyfun
 glfwSetKeyCallback (GLFWwindow *window, GLFWkeyfun callback)
 {
