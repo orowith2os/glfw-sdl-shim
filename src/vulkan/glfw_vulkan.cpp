@@ -84,6 +84,8 @@ glfwVulkanSupported ()
   ENSURE_VULKAN_INIT ()
   ASSERT_GLFW_INIT_INT ()
   ASSERT_VULKAN_LOADED_INT ()
+
+  return GLFW_TRUE;
 }
 
 // This can be called from any thread.

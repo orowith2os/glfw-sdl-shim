@@ -37,10 +37,10 @@ struct ShimGlobalState {
   bool vulkan_loaded = false;
 
   int selected_glfw_platform = GLFW_ANY_PLATFORM;
-  bool failed_sdl_init = false;
   GLFWerrorfun err_callback = nullptr;
   GLFWvkproc vulkan_loader = nullptr;
-  double timer_offset = 0.0;
+  uint64_t timer_start_ms = 0;
+  uint64_t base_time_ms = 0;
 };
 
 // https://www.glfw.org/docs/3.3/intro_guide.html#error_handling

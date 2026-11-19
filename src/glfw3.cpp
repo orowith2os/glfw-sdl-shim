@@ -7,7 +7,6 @@
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3/SDL_timer.h>
 
-#include <cmath>
 #include <string>
 #include <format>
 #include <thread>
@@ -21,40 +20,48 @@ extern "C" {
 int
 glfwInit ()
 {
-  int err = GLFW_NO_ERROR;
-  const char *error_ctx = "";
-
   if (state.initialized)
     return GLFW_TRUE;
 
   if (!SDL_InitSubSystem (SDL_INIT_VIDEO))
     {
-      error_ctx = SDL_GetError ();
-      state.failed_sdl_init = true;
-      err = GLFW_PLATFORM_ERROR;
-    }
-
-  if (!err && !glfw_init_events ())
-    {
-      err = GLFW_PLATFORM_ERROR;
-      error_ctx = "Failed to register custom SDL event?";
-    }
-
-  if (!err)
-    {
-      state.initialized = true;
-      // TODO
-      state.selected_glfw_platform = GLFW_PLATFORM_WAYLAND;
-      return GLFW_TRUE;
-    }
-  else
-    {
-      std::string_view ctx = error_ctx;
-      do_error_things (err, ctx);
-
-      glfwTerminate ();
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      state.initialized = false;
       return GLFW_FALSE;
     }
+
+  if (!glfw_init_events ())
+    {
+      SDL_QuitSubSystem (SDL_INIT_VIDEO);
+      do_error_things (GLFW_PLATFORM_ERROR, "Failed to register custom SDL event");
+      state.initialized = false;
+      return GLFW_FALSE;
+    }
+
+  state.base_time_ms = SDL_GetTicks ();
+  state.timer_start_ms = 0;
+  state.selected_glfw_platform = GLFW_PLATFORM_WAYLAND; // TODO
+  state.initialized = true;
+  return GLFW_TRUE;
+}
+
+void
+glfwTerminate ()
+{
+  if (!state.initialized)
+    return;
+
+  ASSERT_MAIN_THREAD_VOID ()
+
+  if (state.vulkan_loaded)
+    {
+      SDL_Vulkan_UnloadLibrary ();
+      state.vulkan_loaded = false;
+    }
+
+  SDL_QuitSubSystem (SDL_INIT_VIDEO);
+
+  state  = {};
 }
 
 void
@@ -184,23 +191,6 @@ glfwInitHint (int hint, int value)
   do_error_things (err, ctx);
 }
 
-void
-glfwTerminate ()
-{
-  ASSERT_MAIN_THREAD_VOID ()
-
-  if (state.vulkan_loaded)
-    {
-      SDL_Vulkan_UnloadLibrary ();
-      state.vulkan_loaded = false;
-    }
-
-  if (!state.failed_sdl_init)
-    SDL_QuitSubSystem (SDL_INIT_VIDEO);
-
-  state  = {};
-}
-
 // The original GLFW method resets the error on read.
 int
 glfwGetError (const char **description)
@@ -274,54 +264,6 @@ glfwGetVersionString ()
 {
   // This (can) have some debug info that may be useful to users and devs
   return SHIM_VERSION_STRING;
-}
-
-// This can be called from any thread.
-double
-glfwGetTime ()
-{
-  double time = 0.0;
-  if (!state.initialized)
-    return 0.0;
-
-  run_on_main_sync([&]()
-    {
-      Uint64 now_ms = SDL_GetTicks ();
-      time = static_cast<double> (now_ms - state.timer_offset) / 1000;
-    });
-
-  return time;
-}
-
-// This can be called from any thread.
-void
-glfwSetTime (double time)
-{
-  ASSERT_GLFW_INIT_VOID ()
-
-  if (!std::isfinite(time) || time < 0.0)
-  {
-    do_error_things (GLFW_INVALID_VALUE, "Invalid value passed to glfwSetTime.");
-    return;
-  }
-
-  run_on_main_sync([&]()
-    {
-      Uint64 now_ms = SDL_GetTicks ();
-      state.timer_offset = now_ms - static_cast<Uint64> (time * 1000.0);
-    });
-}
-
-uint64_t
-glfwGetTimerValue ()
-{
-  return SDL_GetPerformanceCounter ();
-}
-
-uint64_t
-glfwGetTimerFrequency ()
-{
-  return SDL_GetPerformanceFrequency ();
 }
 
 } // extern "C"
