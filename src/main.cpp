@@ -3,11 +3,18 @@
 #include "glfw3.h"
 
 int main() {
-    const char *error_str = nullptr;
-    std::println ("glfw initialized: {}", glfwInit ());
-    glfwInitVulkanLoader (nullptr);
-    std::println ("error log: {}, {}", glfwGetError(&error_str), error_str);
+    if (!glfwInit()) return -1;
 
-    glfwTerminate ();
+    GLFWwindow* window = glfwCreateWindow(640, 480, "", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+
+    while (!glfwWindowShouldClose(window)) {
+        glfwWaitEvents();
+    }
+
+    glfwTerminate();
     return 0;
 }

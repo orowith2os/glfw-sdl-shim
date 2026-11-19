@@ -59,7 +59,8 @@ glfwInit ()
 void
 glfwInitHint (int hint, int value)
 {
-  ASSERT_MAIN_THREAD_VOID ()
+  if (state.initialized)
+    ASSERT_MAIN_THREAD_VOID()
 
   int err = GLFW_NO_ERROR;
   std::string_view ctx = "";

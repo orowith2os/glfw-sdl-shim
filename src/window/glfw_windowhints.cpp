@@ -15,6 +15,66 @@ glfwDefaultWindowHints (void)
   hints = WindowHints{};
 }
 
+static void
+bool_flags_hint_helper_inverted (int value, int flag, int *err)
+{
+  switch (value)
+    {
+      case GLFW_TRUE:
+        hints.flags &= ~flag;
+        break;
+      case GLFW_FALSE:
+        hints.flags |= flag;
+        break;
+      default:
+        *err = GLFW_INVALID_VALUE;
+        break;
+    }
+}
+
+static void
+bool_flags_hint_helper (int value, int flag, int *err)
+{
+  switch (value)
+    {
+      case GLFW_TRUE:
+        hints.flags |= flag;
+        break;
+      case GLFW_FALSE:
+        hints.flags &= ~flag;
+        break;
+      default:
+        *err = GLFW_INVALID_VALUE;
+        break;
+    }
+}
+
+static void
+int_bits_hint_helper (int value, int *place, int *err)
+{
+  if (value < 0 && value != GLFW_DONT_CARE)
+    *err = GLFW_INVALID_VALUE;
+  else
+    *place = value;
+}
+
+static void
+bool_hint_helper (int value, bool *place, int *err)
+{
+  switch (value)
+    {
+    case GLFW_TRUE:
+      *place = true;
+      break;
+    case GLFW_FALSE:
+      *place = false;
+      break;
+    default:
+      *err = GLFW_INVALID_VALUE;
+      break;
+    }
+}
+
 void
 glfwWindowHint (int hint, int value)
 {
@@ -26,125 +86,34 @@ glfwWindowHint (int hint, int value)
   switch (hint)
     {
     case GLFW_RESIZABLE:
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags |= SDL_WINDOW_RESIZABLE;
-            break;
-          case GLFW_FALSE:
-            hints.flags &= ~SDL_WINDOW_RESIZABLE;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }
+      bool_flags_hint_helper(value, SDL_WINDOW_RESIZABLE, &err);
       break;
     case GLFW_VISIBLE:
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags &= ~SDL_WINDOW_HIDDEN;
-            break;
-          case GLFW_FALSE:
-            hints.flags |= SDL_WINDOW_HIDDEN;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }
+      bool_flags_hint_helper_inverted(value, SDL_WINDOW_HIDDEN, &err);
       break;
     case GLFW_DECORATED:
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags &= ~SDL_WINDOW_BORDERLESS;
-            break;
-          case GLFW_FALSE:
-            hints.flags |= SDL_WINDOW_BORDERLESS;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }
+      bool_flags_hint_helper_inverted(value, SDL_WINDOW_BORDERLESS, &err);
       break;
     case GLFW_FOCUSED:
-    /*
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags |= SDL_WINDOW_INPUT_FOCUS;
-            break;
-          case GLFW_FALSE:
-            hints.flags &= ~SDL_WINDOW_INPUT_FOCUS;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }*/ //TODO
-      break;
     case GLFW_AUTO_ICONIFY:
       return; // global hint, not per-window, in SDL
     case GLFW_FLOATING:
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags |= SDL_WINDOW_ALWAYS_ON_TOP;
-            break;
-          case GLFW_FALSE:
-            hints.flags &= ~SDL_WINDOW_ALWAYS_ON_TOP;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }
+      bool_flags_hint_helper(value, SDL_WINDOW_ALWAYS_ON_TOP, &err);
       break;
     case GLFW_MAXIMIZED:
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags |= SDL_WINDOW_MAXIMIZED;
-            break;
-          case GLFW_FALSE:
-            hints.flags &= ~SDL_WINDOW_MAXIMIZED;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }
+      bool_flags_hint_helper(value, SDL_WINDOW_MAXIMIZED, &err);
       break;
     case GLFW_CENTER_CURSOR:
       return; // TODO: need to handle manually. Warp cursor to center.
     case GLFW_TRANSPARENT_FRAMEBUFFER:
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags |= SDL_WINDOW_TRANSPARENT;
-            break;
-          case GLFW_FALSE:
-            hints.flags &= ~SDL_WINDOW_TRANSPARENT;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }
+      bool_flags_hint_helper(value, SDL_WINDOW_TRANSPARENT, &err);
       break;
     case GLFW_FOCUS_ON_SHOW:
       return; // Not supported per-window on SDL
     case GLFW_SCALE_TO_MONITOR:
       return; // Not supported/TODO?
     case GLFW_SCALE_FRAMEBUFFER:
-      switch (value)
-        {
-          case GLFW_TRUE:
-            hints.flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
-            break;
-          case GLFW_FALSE:
-            hints.flags &= ~SDL_WINDOW_HIGH_PIXEL_DENSITY;
-            break;
-          default:
-            err = GLFW_INVALID_VALUE;
-            break;
-        }
+      bool_flags_hint_helper(value, SDL_WINDOW_HIGH_PIXEL_DENSITY, &err);
       break;
     case GLFW_MOUSE_PASSTHROUGH:
       return; // TODO? SDL_SetWindowMousePassthrough
@@ -154,74 +123,31 @@ glfwWindowHint (int hint, int value)
 
     // GL BS
     case GLFW_RED_BITS:
-      if (value < 0 && value != GLFW_DONT_CARE)
-        err = GLFW_INVALID_VALUE;
-      else
-        hints.red_bits = value;
+      int_bits_hint_helper(value, &hints.red_bits, &err);
       break;
     case GLFW_GREEN_BITS:
-      if (value < 0 && value != GLFW_DONT_CARE)
-        err = GLFW_INVALID_VALUE;
-      else
-        hints.green_bits = value;
+      int_bits_hint_helper(value, &hints.green_bits, &err);
       break;
     case GLFW_BLUE_BITS:
-      if (value < 0 && value != GLFW_DONT_CARE)
-        err = GLFW_INVALID_VALUE;
-      else
-        hints.blue_bits = value;
+      int_bits_hint_helper(value, &hints.blue_bits, &err);
       break;
     case GLFW_ALPHA_BITS:
-      if (value < 0 && value != GLFW_DONT_CARE)
-        err = GLFW_INVALID_VALUE;
-      else
-        hints.alpha_bits = value;
+      int_bits_hint_helper(value, &hints.alpha_bits, &err);
       break;
     case GLFW_DEPTH_BITS:
-      if (value < 0 && value != GLFW_DONT_CARE)
-        err = GLFW_INVALID_VALUE;
-      else
-        hints.depth_bits = value;
+      int_bits_hint_helper(value, &hints.depth_bits, &err);
       break;
     case GLFW_STENCIL_BITS:
-      if (value < 0 && value != GLFW_DONT_CARE)
-        err = GLFW_INVALID_VALUE;
-      else
-        hints.stencil_bits = value;
+      int_bits_hint_helper(value, &hints.stencil_bits, &err);
       break;
     case GLFW_SAMPLES:
-      if (value < 0 && value != GLFW_DONT_CARE)
-        err = GLFW_INVALID_VALUE;
-      else
-        hints.samples = value;
+      int_bits_hint_helper(value, &hints.samples, &err);
       break;
     case GLFW_SRGB_CAPABLE:
-      switch (value)
-        {
-        case GLFW_TRUE:
-          hints.srgb_capable = true;
-          break;
-        case GLFW_FALSE:
-          hints.srgb_capable = false;
-          break;
-        default:
-          err = GLFW_INVALID_VALUE;
-          break;
-        }
+      bool_hint_helper (value, &hints.srgb_capable, &err);
       break;
     case GLFW_DOUBLEBUFFER:
-      switch (value)
-        {
-        case GLFW_TRUE:
-          hints.doublebuffer = true;
-          break;
-        case GLFW_FALSE:
-          hints.doublebuffer = false;
-          break;
-        default:
-          err = GLFW_INVALID_VALUE;
-          break;
-        }
+      bool_hint_helper (value, &hints.doublebuffer, &err);
       break;
     default:
       err = GLFW_INVALID_ENUM;

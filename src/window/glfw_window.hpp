@@ -10,6 +10,8 @@ struct WindowHints
   SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE |
                           SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
+  int api = GLFW_OPENGL_API;
+
   // GL and framebuffer BS
   int red_bits = 8;
   int green_bits = 8;
