@@ -10,24 +10,35 @@
 #include <print>
 
 #define ENSURE_VULKAN_INIT()\
-  glfwInit ();\
   glfwInitVulkanLoader (nullptr);\
+
+#define ASSERT_VULKAN_LOADED_PTR()\
+  if (!state.vulkan_loaded)\
+    {\
+      do_error_things (GLFW_API_UNAVAILABLE, "Vulkan isn't available.");\
+      return nullptr;\
+    }\
 
 const char **
 glfwGetRequiredInstanceExtensions (uint32_t* count)
 {
-  ENSURE_VULKAN_INIT ()
+  ASSERT_VULKAN_LOADED_PTR ()
   const char **result = nullptr;
 
-  if (!state.vulkan_loaded)
-    do_error_things (GLFW_NOT_INITIALIZED, "Vulkan wasn't loaded.");
+  if (!assert_glfw_init () || !count)
+    return nullptr;
+
+  ASSERT_MAIN_THREAD_PTR()
 
   run_on_main_sync ([&]()
     {
       auto exts = SDL_Vulkan_GetInstanceExtensions (count);
 
       if (!exts)
-        do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
+        {
+          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+          *count = 0;
+        }
 
       result = (const char**) exts;
     });
@@ -40,12 +51,13 @@ glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
 {
   glfwInit ();
 
-  // TODO
-  if (loader)
-    std::println ("Ignoring custom Vulkan loader argument. This isn't compatible, for now at least.");
-
   if (state.vulkan_loaded)
     return;
+
+  if (loader)
+    // We'd need to deal with extension stuff ourselves...
+    std::println ("Ignoring custom Vulkan loader argument. This isn't compatible, for now at least.");
+
   run_on_main_sync([&]()
     {
       if (SDL_Vulkan_LoadLibrary (nullptr))
@@ -59,42 +71,23 @@ int
 glfwVulkanSupported (void)
 {
   ENSURE_VULKAN_INIT ()
-  int result;
+  ASSERT_GLFW_INIT_INT ()
 
   if (state.vulkan_loaded)
     return GLFW_TRUE;
-
-  run_on_main_sync ([&]()
-    {
-      if (SDL_Vulkan_LoadLibrary (nullptr))
-        {
-          SDL_Vulkan_UnloadLibrary ();
-          result = GLFW_TRUE;
-        }
-      else
-        {
-          do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
-          result = GLFW_FALSE;
-        }
-    });
-
-  return result;
+  else
+    return GLFW_FALSE;
 }
 
 GLFWvkproc
 glfwGetInstanceProcAddress (VkInstance  instance,
                             const char *procname)
 {
-  ENSURE_VULKAN_INIT ()
+  ENSURE_VULKAN_INIT()
+  ASSERT_VULKAN_LOADED_PTR()
+
   GLFWvkproc result = nullptr;
 
-  if (!glfwVulkanSupported())
-    {
-      do_error_things (GLFW_API_UNAVAILABLE, "Vulkan doesn't appear to be supported.");
-      return nullptr;
-    }
-
-  glfwInitVulkanLoader (nullptr);
   run_on_main_sync ([&]()
     {
       auto vk_proc_addr = (PFN_vkGetInstanceProcAddr) SDL_Vulkan_GetVkGetInstanceProcAddr ();
@@ -123,7 +116,8 @@ glfwGetPhysicalDevicePresentationSupport (VkInstance instance,
     {
       if (!SDL_Vulkan_GetPresentationSupport (instance, device, queuefamily))
         {
-          do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
+          // This might be a bit spammy. Can always re-enable later.
+          //do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
           result = GLFW_FALSE;
         }
       else
@@ -142,6 +136,12 @@ glfwCreateWindowSurface (VkInstance instance,
   ENSURE_VULKAN_INIT ()
   VkResult result;
 
+  if (!state.vulkan_loaded || !window || !surface)
+    return VK_ERROR_INITIALIZATION_FAILED;
+
+  if (window->client_api != GLFW_NO_API)
+    return VK_ERROR_NATIVE_WINDOW_IN_USE_KHR;
+
   run_on_main_sync ([&]()
     {
       if (!SDL_Vulkan_CreateSurface(window->sdl_window,
@@ -149,7 +149,7 @@ glfwCreateWindowSurface (VkInstance instance,
                                     allocator,
                                     surface))
         {
-          do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
+          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
           result = VK_ERROR_UNKNOWN;
         }
       else

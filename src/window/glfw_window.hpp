@@ -39,6 +39,7 @@ struct GLFWwindow {
   // you can't do multiple.
   SDL_Window *sdl_window;
   SDL_GLContext gl_context;
+  int client_api;
   bool should_close;
 };
 

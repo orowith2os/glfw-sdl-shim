@@ -90,3 +90,15 @@ assert_main_thread ()
     }
   return GLFW_TRUE;
 }
+
+int
+assert_glfw_init ()
+{
+  if (state.initialized)
+    return GLFW_TRUE;
+  else
+    {
+      do_error_things(GLFW_NOT_INITIALIZED, "GLFW was not initialized.");
+      return GLFW_FALSE;
+    }
+}

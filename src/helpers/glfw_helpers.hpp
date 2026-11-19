@@ -33,6 +33,7 @@ struct ShimGlobalState {
   bool failed_sdl_init;
   bool vulkan_loaded;
   GLFWerrorfun err_callback;
+  GLFWvkproc vulkan_loader;
 };
 
 // https://www.glfw.org/docs/3.3/intro_guide.html#error_handling
@@ -66,6 +67,13 @@ assert_main_thread ();
   if (!assert_main_thread ())\
     return;
 
-#define ASSERT_MAIN_THREAD_PTR() \
+#define ASSERT_MAIN_THREAD_PTR()\
   if (!assert_main_thread ())\
     return nullptr;
+
+int
+assert_glfw_init ();
+
+#define ASSERT_GLFW_INIT_INT()\
+  if (!assert_glfw_init ())\
+    return GLFW_FALSE;

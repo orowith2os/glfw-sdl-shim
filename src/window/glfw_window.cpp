@@ -140,6 +140,7 @@ glfwCreateWindow (int width, int height,
       return nullptr;
     }
 
+  window->client_api = hints.client_api;
   return window;
 }
 
