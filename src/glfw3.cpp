@@ -312,4 +312,16 @@ glfwSetTime (double time)
     });
 }
 
+uint64_t
+glfwGetTimerValue ()
+{
+  return SDL_GetPerformanceCounter ();
+}
+
+uint64_t
+glfwGetTimerFrequency ()
+{
+  return SDL_GetPerformanceFrequency ();
+}
+
 } // extern "C"
