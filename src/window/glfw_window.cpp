@@ -24,17 +24,6 @@ glfw_window_dispatch_event (SDL_WindowEvent event)
 }
 
 void
-glfwSwapBuffers (GLFWwindow *window)
-{
-  glfwInit ();
-  run_on_main_sync([&]()
-    {
-      if (!SDL_GL_SwapWindow(window->sdl_window))
-        do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
-    });
-}
-
-void
 glfwDestroyWindow (GLFWwindow *window)
 {
   ASSERT_MAIN_THREAD_VOID ()

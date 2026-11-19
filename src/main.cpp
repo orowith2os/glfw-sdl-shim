@@ -19,6 +19,8 @@ int main() {
 
     // 3. Make the window's context current
     glfwMakeContextCurrent(window);
+    // bye bye GPU
+    glfwSwapInterval (0);
 
     // 4. Main loop
     while (!glfwWindowShouldClose(window)) {

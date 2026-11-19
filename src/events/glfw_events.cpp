@@ -1,5 +1,6 @@
 #include "helpers/glfw_helpers.hpp"
 #include <cmath>
+#include <chrono>
 
 #include <SDL3/SDL_events.h>
 #include "window/glfw_window.hpp"
@@ -45,13 +46,12 @@ glfwWaitEvents ()
 
   SDL_Event event;
   if (SDL_WaitEvent(&event)) {
-    if (event.type != shim_wakeup_event_type) {
-        return;
-    }
+    if (event.type != shim_wakeup_event_type)
+      dispatch_event (event);
+
     drain_event_queue();
-  } else {
+  } else
     do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
-  }
 }
 
 void
@@ -78,19 +78,15 @@ glfwWaitEventsTimeout (double timeout)
         return;
     }
 
-  double ms_double = timeout * 1000.0;
-  Sint32 timeout_ms = (ms_double >= static_cast<double>(std::numeric_limits<Sint32>::max()))
-    ? std::numeric_limits<Sint32>::max()
-    : static_cast<Sint32>(ms_double);
+  // Possible overflow, but I'd be concerned if a client were waiting that long...
+  Sint32 timeout_ms = timeout * 1000;
 
   SDL_Event event;
 
   if (SDL_WaitEventTimeout(&event, timeout_ms))
     {
       if (event.type != shim_wakeup_event_type)
-        {
-          return; //TODO
-        }
+          dispatch_event (event);
       drain_event_queue();
     }
 }

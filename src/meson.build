@@ -20,6 +20,7 @@ configure_file(
 
 glfw_sdl_shim_sources = [
   'glfw3.cpp',
+  'opengl/glfw_opengl.cpp',
   'events/glfw_events.cpp',
   'window/glfw_window.cpp',
   'window/glfw_windowhints.cpp',
