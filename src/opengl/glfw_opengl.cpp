@@ -5,6 +5,27 @@
 extern "C" {
 
 // This can be called from any thread.
+GLFWglproc
+glfwGetProcAddress (const char *procname)
+{
+  ASSERT_GLFW_INIT_PTR ()
+  if (!procname)
+    return nullptr;
+
+  GLFWglproc ptr = nullptr;
+
+  run_on_main_sync ([&]()
+    {
+      if (!SDL_GL_GetCurrentContext ())
+        return;
+
+      ptr = SDL_GL_GetProcAddress (procname);
+    });
+
+  return ptr;
+}
+
+// This can be called from any thread.
 int
 glfwExtensionSupported (const char *extension)
 {
