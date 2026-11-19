@@ -63,7 +63,6 @@ glfwSetWindowTitle (GLFWwindow *window, const char *title)
 {
   ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
-
   if (!window || !window->sdl_window)
     return;
 
@@ -95,12 +94,13 @@ glfwShowWindow (GLFWwindow *window)
 void
 glfwSetInputMode (GLFWwindow *window, int mode, int value)
 {
+  ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
-  int err = GLFW_NO_ERROR;
-  std::string_view ctx = "";
-
   if (!window)
     return;
+
+  int err = GLFW_NO_ERROR;
+  std::string_view ctx = "";
 
   switch (mode)
     {
@@ -127,6 +127,7 @@ glfwSetInputMode (GLFWwindow *window, int mode, int value)
 GLFWkeyfun
 glfwSetKeyCallback (GLFWwindow *window, GLFWkeyfun callback)
 {
+  ASSERT_GLFW_INIT ()
   ASSERT_MAIN_THREAD_PTR ()
 
   GLFWkeyfun old_callback = window->key_callback;
@@ -151,8 +152,8 @@ glfwGetFramebufferSize (GLFWwindow *window,
   else
     return;
 
-  ASSERT_MAIN_THREAD_VOID ()
   ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
 
   if (!window)
     {
@@ -174,6 +175,7 @@ glfwGetFramebufferSize (GLFWwindow *window,
 void
 glfwDestroyWindow (GLFWwindow *window)
 {
+  ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
   if (window)
     delete window;
