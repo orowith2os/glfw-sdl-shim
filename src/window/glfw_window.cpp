@@ -5,8 +5,60 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_hints.h>
+#include <span>
 
 extern "C" {
+
+void
+glfwSetWindowIcon (GLFWwindow *window, int count, const GLFWimage *images)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window || !window->sdl_window || count < 0)
+    return;
+
+  if (count == 0 || !images)
+    return; // SDL doesn't have a "default" concept
+
+  std::span<const GLFWimage> imageSpan (images, static_cast<std::size_t> (count));
+
+  SDL_Surface *valid_surface = nullptr;
+  for (const GLFWimage &img : imageSpan)
+    {
+      auto surface = sdl_surface_from_glfw_image (&img);
+
+      if (!surface)
+        continue;
+      else if (!valid_surface)
+        {
+          valid_surface = surface;
+          continue;
+        }
+      else
+        SDL_AddSurfaceAlternateImage (valid_surface, surface);
+
+      SDL_DestroySurface (surface);
+    }
+
+  if (valid_surface)
+    {
+      SDL_SetWindowIcon (window->sdl_window, valid_surface);
+      SDL_DestroySurface (valid_surface);
+    }
+}
+
+
+void
+glfwSetWindowTitle (GLFWwindow *window, const char *title)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+
+  if (!window || !window->sdl_window)
+    return;
+
+  SDL_SetWindowTitle (window->sdl_window, title ? title : "");
+}
 
 void
 glfwShowWindow (GLFWwindow *window)

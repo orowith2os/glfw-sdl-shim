@@ -10,6 +10,9 @@
 #include "sdl_scancode.hpp"
 #include "window/glfw_window.hpp"
 
+SDL_Surface *
+sdl_surface_from_glfw_image (const GLFWimage *image);
+
 void
 glfw_window_from_sdl_window (SDL_Window *sdl_window,
                              GLFWwindow **window);

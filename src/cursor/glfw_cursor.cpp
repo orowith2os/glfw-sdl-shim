@@ -26,21 +26,14 @@ glfwCreateCursor (const GLFWimage *image, int xhot, int yhot)
   ASSERT_MAIN_THREAD_PTR ()
   ASSERT_GLFW_INIT_PTR ()
 
-  if (!image || !image->pixels || image->width <= 0 || image->height <= 0)
+  auto surface = sdl_surface_from_glfw_image (image);
+  if (!surface)
     return nullptr;
 
   auto glfw_cursor = new (std::nothrow) GLFWcursor ();
   if (!glfw_cursor)
-    return nullptr;
-
-  SDL_Surface* surface = SDL_CreateSurfaceFrom (image->width,
-                                                image->height,
-                                                SDL_PIXELFORMAT_RGBA32,
-                                                image->pixels,
-                                                image->width * 4);
-  if (!surface)
     {
-      delete glfw_cursor;
+      SDL_DestroySurface (surface);
       return nullptr;
     }
 

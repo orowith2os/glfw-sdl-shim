@@ -3,6 +3,19 @@
 
 #include <format>
 
+SDL_Surface *
+sdl_surface_from_glfw_image (const GLFWimage *image)
+{
+  if (!image || !image->pixels || image->width <= 0 || image->height <= 0)
+    return nullptr;
+
+  return SDL_CreateSurfaceFrom (image->width,
+                                image->height,
+                                SDL_PIXELFORMAT_RGBA32,
+                                image->pixels,
+                                image->width * 4);
+}
+
 void
 glfw_window_from_sdl_window (SDL_Window *sdl_window,
                              GLFWwindow **window)
