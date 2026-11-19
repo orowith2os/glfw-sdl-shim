@@ -61,13 +61,14 @@ glfwWaitEvents ()
   glfw_init_events ();
 
   SDL_Event event;
-  if (SDL_WaitEvent(&event)) {
-    if (event.type != shim_wakeup_event_type)
-      dispatch_event (event);
+  if (SDL_WaitEvent(&event))
+    {
+      if (event.type != shim_wakeup_event_type)
+        dispatch_event (event);
 
-    drain_event_queue();
-  } else
-    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      drain_event_queue ();
+    } else
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
 }
 
 void
@@ -106,7 +107,7 @@ glfwWaitEventsTimeout (double timeout)
     {
       if (event.type != shim_wakeup_event_type)
           dispatch_event (event);
-      drain_event_queue();
+      drain_event_queue ();
     }
 }
 

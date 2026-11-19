@@ -11,6 +11,139 @@
 extern "C" {
 
 void
+glfwGetWindowPos (GLFWwindow* window, int* xpos, int* ypos)
+{
+  if (xpos)
+    *xpos = 0;
+  if (ypos)
+    *ypos = 0;
+  if (!xpos && !ypos)
+    return;
+
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+
+  if (!window)
+    {
+      do_error_things (GLFW_INVALID_VALUE, "Didn't pass a window to glfwGetWindowPos.");
+      return;
+    }
+
+  int x = 0, y = 0;
+  if (!SDL_GetWindowPosition (window->sdl_window, &x, &y))
+    {
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      return;
+    }
+
+  *xpos = x;
+  *ypos = x;
+}
+
+void
+glfwSetWindowPos (GLFWwindow* window, int xpos, int ypos)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window)
+    return;
+
+  if (!SDL_SetWindowPosition (window->sdl_window, xpos, ypos))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+}
+
+void
+glfwHideWindow (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window)
+    return;
+
+  if (!SDL_HideWindow (window->sdl_window))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+}
+
+void
+glfwGetWindowSize (GLFWwindow *window, int *width, int *height)
+{
+  if (width)
+    *width = 0;
+  if (height)
+    *height = 0;
+  if (!width && !height)
+    return;
+
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+
+  if (!window)
+    {
+      do_error_things (GLFW_INVALID_VALUE, "Didn't pass a window to glfwGetWindowSize.");
+      return;
+    }
+
+  int w = 0, h = 0;
+  if (!SDL_GetWindowSize (window->sdl_window, &w, &h))
+    {
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      return;
+    }
+
+  *width = w;
+  *height = h;
+}
+
+void
+glfwSetWindowSize (GLFWwindow *window, int width, int height)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window)
+    return;
+
+  if (!SDL_SetWindowSize (window->sdl_window, width, height))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+}
+
+void
+glfwSetWindowUserPointer (GLFWwindow *window, void *pointer)
+{
+  ASSERT_GLFW_INIT_VOID ()
+
+  run_on_main_sync ([&]()
+    {
+      window->user_pointer = pointer;
+    });
+}
+
+void *
+glfwGetWindowUserPointer (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_PTR ()
+  void *ptr = nullptr;
+
+  run_on_main_sync ([&]()
+    {
+      ptr = window->user_pointer;
+    });
+
+  return ptr;
+}
+
+void
+glfwRequestWindowAttention (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window)
+    return;
+
+  if (!SDL_FlashWindow (window->sdl_window, SDL_FLASH_UNTIL_FOCUSED))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+}
+
+void
 glfwSetClipboardString (GLFWwindow *, const char* string)
 {
   ASSERT_GLFW_INIT_VOID ()
@@ -192,12 +325,9 @@ glfwGetFramebufferSize (GLFWwindow *window,
 
   if (width)
     *width = 0;
-  else
-    return;
-
   if (height)
     *height = 0;
-  else
+  if (!width && !height)
     return;
 
   ASSERT_GLFW_INIT_VOID ()
@@ -212,7 +342,7 @@ glfwGetFramebufferSize (GLFWwindow *window,
   int w = 0, h = 0;
   if (!SDL_GetWindowSizeInPixels (window->sdl_window, &w, &h))
     {
-      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError());
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
       return;
     }
 

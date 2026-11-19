@@ -44,6 +44,7 @@ struct GLFWwindow {
   GLFWcursor *cursor = nullptr;
   bool focus_on_show = false;
   GLFWscrollfun scroll_callback = nullptr;
+  void *user_pointer = nullptr;
 
   ~GLFWwindow ()
     {

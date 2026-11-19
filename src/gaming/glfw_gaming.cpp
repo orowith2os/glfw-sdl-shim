@@ -83,7 +83,7 @@ glfwGetGamepadName (int jid)
 }
 
 int
-glfwGetGamepadState (int jid, GLFWgamepadstate *state)
+glfwGetGamepadState (int jid, GLFWgamepadstate *gamepad_state)
 {
   return GLFW_FALSE; // TODO
 }
