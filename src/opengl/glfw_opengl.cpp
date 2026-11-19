@@ -4,6 +4,24 @@
 
 extern "C" {
 
+GLFWwindow *
+glfwGetCurrentContext ()
+{
+  ASSERT_GLFW_INIT_PTR ()
+  GLFWwindow *window = nullptr;
+
+  run_on_main_sync([&]()
+    {
+      auto sdl_window = SDL_GL_GetCurrentWindow ();
+      if (sdl_window)
+        glfw_window_from_sdl_window (sdl_window, &window);
+      else
+        do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+    });
+
+  return window;
+}
+
 // This can be called from any thread.
 GLFWglproc
 glfwGetProcAddress (const char *procname)
