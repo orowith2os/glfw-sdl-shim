@@ -3,6 +3,9 @@
 #include "helpers/glfw_helpers.hpp"
 #include <SDL3/SDL_video.h>
 
+void
+glfw_window_dispatch_event (SDL_WindowEvent event);
+
 extern "C" {
 
 struct WindowHints
@@ -10,8 +13,8 @@ struct WindowHints
   SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE |
                           SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
-  int client_api = GLFW_OPENGL_ANY_PROFILE;
-  int opengl_profile = 0;
+  int client_api = GLFW_OPENGL_API;
+  int opengl_profile = GLFW_OPENGL_ANY_PROFILE;
   int opengl_version_major = 1;
   int opengl_version_minor = 0;
   bool forward_compat = false;

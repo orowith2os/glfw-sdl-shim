@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include <SDL3/SDL_events.h>
+#include "window/glfw_window.hpp"
 
 static Uint32 shim_wakeup_event_type = 0;
 
@@ -13,13 +14,21 @@ glfw_init_events ()
 }
 
 static void
-drain_event_queue() {
+dispatch_event (SDL_Event event)
+{
+  if (event.type >= SDL_EVENT_WINDOW_FIRST && event.type <= SDL_EVENT_WINDOW_LAST)
+    glfw_window_dispatch_event (event.window);
+}
+
+static void
+drain_event_queue()
+{
   SDL_Event event;
-  while (SDL_PollEvent(&event)) {
-    if (event.type != shim_wakeup_event_type) {
-      continue; // TODO
+  while (SDL_PollEvent(&event))
+    {
+      if (event.type != shim_wakeup_event_type)
+        dispatch_event (event);
     }
-  }
 }
 
 void

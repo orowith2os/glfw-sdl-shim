@@ -30,6 +30,7 @@ glfw_sdl_shim_sources = [
 
 glfw_sdl_shim_deps = [
   sdl3_dep,
+  gl_dep,
 ]
 
 executable('glfw-sdl-shim', glfw_sdl_shim_sources,

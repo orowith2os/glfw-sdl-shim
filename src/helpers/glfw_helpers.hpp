@@ -8,6 +8,10 @@
 #include <string_view>
 #include <string>
 
+void
+glfw_window_from_sdl_window (SDL_Window *sdl_window,
+                             GLFWwindow **window);
+
 template <typename Func>
 [[maybe_unused]]
 static bool

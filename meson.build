@@ -7,5 +7,6 @@ project('glfw-sdl-shim', ['cpp', 'c'],
 include_dir = include_directories('include')
 
 sdl3_dep = dependency('SDL3')
+gl_dep = dependency('gl')
 
 subdir('src')

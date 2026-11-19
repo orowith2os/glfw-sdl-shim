@@ -3,6 +3,14 @@
 
 #include <format>
 
+void
+glfw_window_from_sdl_window (SDL_Window *sdl_window,
+                             GLFWwindow **window)
+{
+  SDL_PropertiesID props = SDL_GetWindowProperties(sdl_window);
+  *window = static_cast<GLFWwindow*>(SDL_GetPointerProperty(props, "gay.oro.glfw_window_pointer", nullptr));
+}
+
 // https://www.glfw.org/docs/latest/group__errors.html
 std::optional<std::string_view>
 err_to_string (int err)

@@ -2,6 +2,38 @@
 #include "helpers/glfw_helpers.hpp"
 #include "glfw_window.hpp"
 
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_events.h>
+
+void
+glfw_window_dispatch_event (SDL_WindowEvent event)
+{
+  SDL_Window *sdl_window = SDL_GetWindowFromID(event.windowID);
+  GLFWwindow *window = nullptr;
+
+  if (!sdl_window)
+    return;
+
+  glfw_window_from_sdl_window(sdl_window, &window);
+
+  if (!window)
+    return;
+
+  if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+    window->should_close = true;
+}
+
+void
+glfwSwapBuffers (GLFWwindow *window)
+{
+  glfwInit ();
+  run_on_main_sync([&]()
+    {
+      if (!SDL_GL_SwapWindow(window->sdl_window))
+        do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+    });
+}
+
 void
 glfwDestroyWindow (GLFWwindow *window)
 {
@@ -70,7 +102,7 @@ glfwCreateWindow (int width, int height,
       }
 
     // Don't bother with GL if the client is handling it.
-    if (hints.client_api != GLFW_NO_API)
+    if (hints.client_api == GLFW_NO_API)
       return;
 
     SDL_GL_SetAttribute (SDL_GL_CONTEXT_MAJOR_VERSION, hints.opengl_version_major);
@@ -105,6 +137,11 @@ glfwCreateWindow (int width, int height,
 
      window->gl_context = SDL_GL_CreateContext (window->sdl_window);
      SDL_GL_SetAttribute (SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
+
+     SDL_GL_MakeCurrent(window->sdl_window, window->gl_context);
+
+    SDL_PropertiesID props = SDL_GetWindowProperties(window->sdl_window);
+    SDL_SetPointerProperty(props, "gay.oro.glfw_window_pointer", window);
   });
 
   if (!result || !window->sdl_window)
@@ -123,7 +160,10 @@ glfwMakeContextCurrent (GLFWwindow *window)
   glfwInit ();
 
   if (!window->gl_context)
-    do_error_things (GLFW_NO_WINDOW_CONTEXT, "Window did not have an OpenGL context.");
+    {
+      do_error_things (GLFW_NO_WINDOW_CONTEXT, "Window did not have an OpenGL context.");
+      std::abort ();
+    }
 
   run_on_main_sync([&]()
     {
