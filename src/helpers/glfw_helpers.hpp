@@ -44,6 +44,7 @@ struct ShimGlobalState {
   GLFWvkproc vulkan_loader = nullptr;
   uint64_t timer_start_ms = 0;
   uint64_t base_time_ms = 0;
+  GLFWjoystickfun joystick_callback = nullptr;
 };
 
 // https://www.glfw.org/docs/3.3/intro_guide.html#error_handling

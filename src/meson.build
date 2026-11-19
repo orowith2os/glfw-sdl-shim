@@ -30,6 +30,7 @@ glfw_sdl_shim_sources = [
   'vulkan/glfw_vulkan.cpp',
   'helpers/glfw_helpers.cpp',
   'cursor/glfw_cursor.cpp',
+  'gaming/glfw_gaming.cpp',
   'main.cpp',
 ]
 
