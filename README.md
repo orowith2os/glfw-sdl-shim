@@ -12,3 +12,9 @@ Use `inline` instead of `extern` when managing global statics. Don't be afraid
 to require a newer C++ version; it already makes use of C++ 23 features.
 
 GLib coding style is generally preferred.
+
+Use `new` and `delete`, with destructors. A new object should be made like so:
+
+```
+auto window = new (std::nothrow) GLFWwindow ();
+```

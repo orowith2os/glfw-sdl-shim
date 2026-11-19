@@ -125,7 +125,7 @@ glfwCreateWindow (int width, int height,
   ASSERT_MAIN_THREAD_PTR ()
 
   int context_flags = 0;
-  GLFWwindow *window = new (std::nothrow) GLFWwindow;
+  GLFWwindow *window = new (std::nothrow) GLFWwindow ();
   SDL_WindowFlags flags = hints.flags;
 
   if (!window)

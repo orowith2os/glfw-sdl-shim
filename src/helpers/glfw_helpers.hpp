@@ -112,3 +112,7 @@ assert_glfw_init ();
 #define ASSERT_GLFW_INIT_VOID()\
   if (!assert_glfw_init ())\
     return;
+
+#define ASSERT_GLFW_INIT_PTR()\
+  if (!assert_glfw_init ())\
+    return nullptr;

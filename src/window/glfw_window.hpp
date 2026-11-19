@@ -40,6 +40,7 @@ struct GLFWwindow {
   bool should_close;
   GLFWkeyfun key_callback;
   bool lock_key_mods;
+  GLFWcursor *cursor;
 };
 
 } // extern "C"

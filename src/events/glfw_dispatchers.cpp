@@ -1,5 +1,6 @@
 #include "helpers/glfw_helpers.hpp"
 #include "window/glfw_window.hpp"
+#include "glfw_dispatchers.hpp"
 
 void
 glfw_window_dispatch_event (SDL_WindowEvent event)
@@ -11,6 +12,8 @@ glfw_window_dispatch_event (SDL_WindowEvent event)
 
   if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
     window->should_close = true;
+  else
+    glfw_cursor_focus_dispatch_event (event);
 }
 
 void
