@@ -127,7 +127,7 @@ glfwSetInputMode (GLFWwindow *window, int mode, int value)
 GLFWkeyfun
 glfwSetKeyCallback (GLFWwindow *window, GLFWkeyfun callback)
 {
-  ASSERT_GLFW_INIT ()
+  ASSERT_GLFW_INIT_PTR ()
   ASSERT_MAIN_THREAD_PTR ()
 
   GLFWkeyfun old_callback = window->key_callback;
