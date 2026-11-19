@@ -9,10 +9,11 @@ struct GLFWcursor {
   SDL_Cursor *sdl_cursor = SDL_GetDefaultCursor ();
   std::vector<GLFWwindow *> using_windows;
 
-  ~GLFWcursor() {
-    if (sdl_cursor)
-      SDL_DestroyCursor (sdl_cursor);
-  }
+  ~GLFWcursor()
+    {
+      if (sdl_cursor)
+        SDL_DestroyCursor (sdl_cursor);
+    }
 };
 
 [[nodiscard]] constexpr SDL_SystemCursor

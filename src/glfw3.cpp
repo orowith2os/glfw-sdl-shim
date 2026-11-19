@@ -10,7 +10,6 @@
 #include <cmath>
 #include <string>
 #include <format>
-#include <atomic>
 #include <thread>
 #include <print>
 
@@ -74,7 +73,7 @@ glfwInitHint (int hint, int value)
       switch (value)
         {
         case GLFW_PLATFORM_WAYLAND:
-          // TODO
+          return; // TODO
         case GLFW_ANY_PLATFORM:
           return;
         case GLFW_PLATFORM_NULL:
@@ -188,9 +187,6 @@ glfwInitHint (int hint, int value)
 void
 glfwTerminate ()
 {
-  if (!state.initialized)
-    return;
-
   ASSERT_MAIN_THREAD_VOID ()
 
   if (state.vulkan_loaded)
@@ -202,7 +198,7 @@ glfwTerminate ()
   if (!state.failed_sdl_init)
     SDL_QuitSubSystem (SDL_INIT_VIDEO);
 
-  state.initialized = false;
+  state  = {};
 }
 
 // The original GLFW method resets the error on read.
@@ -229,6 +225,8 @@ glfwInitAllocator (const GLFWallocator *)
   std::println ("Silently ignoring glfwInitAllocator, not compatible with SDL...");
 }
 
+// This can be called from any thread, but we don't
+// have a good way to sync it yet.
 int
 glfwGetPlatform ()
 {
@@ -248,11 +246,11 @@ glfwPlatformSupported (int platform)
     }
 }
 
+// This can be called from any thread, but we don't
+// have a good way to sync it yet.
 GLFWerrorfun
 glfwSetErrorCallback (GLFWerrorfun callback)
 {
-  ASSERT_MAIN_THREAD_PTR ()
-
   GLFWerrorfun old_callback = state.err_callback;
 
   state.err_callback = callback;
@@ -278,26 +276,40 @@ glfwGetVersionString ()
   return SHIM_VERSION_STRING;
 }
 
+// This can be called from any thread.
 double
 glfwGetTime ()
 {
-  glfwInit ();
+  double time = 0.0;
+  if (!state.initialized)
+    return 0.0;
 
-  Uint64 now_ms = SDL_GetTicks ();
-  return static_cast<double> (now_ms - state.timer_offset) / 1e9;
+  run_on_main_sync([&]()
+    {
+      Uint64 now_ms = SDL_GetTicks ();
+      time = static_cast<double> (now_ms - state.timer_offset) / 1000;
+    });
+
+  return time;
 }
 
+// This can be called from any thread.
 void
 glfwSetTime (double time)
 {
-  glfwInit ();
+  ASSERT_GLFW_INIT_VOID ()
 
-  if (!std::isfinite(time) || time < 0.0 || time > 18446744073.0)
+  if (!std::isfinite(time) || time < 0.0)
   {
-    do_error_things(GLFW_INVALID_VALUE, "Invalid value passed to glfwSetTime.");
+    do_error_things (GLFW_INVALID_VALUE, "Invalid value passed to glfwSetTime.");
     return;
   }
 
+  run_on_main_sync([&]()
+    {
+      Uint64 now_ms = SDL_GetTicks ();
+      state.timer_offset = now_ms - static_cast<Uint64> (time * 1000.0);
+    });
 }
 
 } // extern "C"

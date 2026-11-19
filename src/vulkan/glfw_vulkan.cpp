@@ -19,18 +19,25 @@
       return nullptr;\
     }\
 
+#define ASSERT_VULKAN_LOADED_INT()\
+  if (!state.vulkan_loaded)\
+    {\
+      do_error_things (GLFW_API_UNAVAILABLE, "Vulkan isn't available.");\
+      return GLFW_FALSE;\
+    }\
+
 extern "C" {
 
+// This can be called from any thread.
 const char **
 glfwGetRequiredInstanceExtensions (uint32_t* count)
 {
+  ASSERT_GLFW_INIT_PTR ()
   ASSERT_VULKAN_LOADED_PTR ()
+
   const char **result = nullptr;
-
-  if (!assert_glfw_init () || !count)
+  if (!count)
     return nullptr;
-
-  ASSERT_MAIN_THREAD_PTR()
 
   run_on_main_sync ([&]()
     {
@@ -48,6 +55,7 @@ glfwGetRequiredInstanceExtensions (uint32_t* count)
   return result;
 }
 
+// This can be called from any thread.
 void
 glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
 {
@@ -69,23 +77,22 @@ glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
     });
 }
 
+// This can be called from any thread.
 int
 glfwVulkanSupported ()
 {
   ENSURE_VULKAN_INIT ()
   ASSERT_GLFW_INIT_INT ()
-
-  if (state.vulkan_loaded)
-    return GLFW_TRUE;
-  else
-    return GLFW_FALSE;
+  ASSERT_VULKAN_LOADED_INT ()
 }
 
+// This can be called from any thread.
 GLFWvkproc
 glfwGetInstanceProcAddress (VkInstance  instance,
                             const char *procname)
 {
   ENSURE_VULKAN_INIT()
+  ASSERT_GLFW_INIT_PTR ()
   ASSERT_VULKAN_LOADED_PTR()
 
   GLFWvkproc result = nullptr;
@@ -103,16 +110,16 @@ glfwGetInstanceProcAddress (VkInstance  instance,
   return result;
 }
 
+// This can be called from any thread.
 int
 glfwGetPhysicalDevicePresentationSupport (VkInstance instance,
                                           VkPhysicalDevice device,
                                           uint32_t queuefamily)
 {
   ENSURE_VULKAN_INIT ()
+  ASSERT_GLFW_INIT_INT ()
+  ASSERT_VULKAN_LOADED_INT ()
   int result;
-
-  if (!state.vulkan_loaded)
-    return GLFW_FALSE;
 
   run_on_main_sync ([&]()
     {
@@ -129,6 +136,7 @@ glfwGetPhysicalDevicePresentationSupport (VkInstance instance,
     return result;
 }
 
+// This can be called from any thread.
 VkResult
 glfwCreateWindowSurface (VkInstance instance,
                          GLFWwindow *window,

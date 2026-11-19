@@ -1,9 +1,8 @@
 #pragma once
 
 #include "helpers/glfw_helpers.hpp"
+#include "cursor/glfw_cursor.hpp"
 #include <SDL3/SDL_video.h>
-
-extern "C" {
 
 struct WindowHints
 {
@@ -34,16 +33,34 @@ struct WindowHints
 struct GLFWwindow {
   // A window and GL context are 1-1 in GLFW,
   // you can't do multiple.
-  SDL_Window *sdl_window;
-  SDL_GLContext gl_context;
-  int client_api;
-  bool should_close;
-  GLFWkeyfun key_callback;
-  bool lock_key_mods;
-  GLFWcursor *cursor;
-};
+  SDL_Window *sdl_window = nullptr;
+  SDL_GLContext gl_context = nullptr;
+  int client_api = GLFW_OPENGL_API;
+  bool should_close = false;
+  GLFWkeyfun key_callback = nullptr;
+  bool lock_key_mods = false;
+  GLFWcursor *cursor = nullptr;
 
-} // extern "C"
+  ~GLFWwindow ()
+    {
+      auto old_window = SDL_GL_GetCurrentWindow ();
+      auto old_context = SDL_GL_GetCurrentContext ();
+
+      if (cursor)
+        glfwDestroyCursor (cursor);
+
+      if (gl_context)
+        SDL_GL_DestroyContext (gl_context);
+
+      if (sdl_window)
+        SDL_DestroyWindow (sdl_window);
+
+      if (old_window && old_context &&
+          old_window != sdl_window &&
+          old_context != gl_context)
+        SDL_GL_MakeCurrent(old_window, old_context);
+    }
+};
 
 inline WindowHints hints;
 

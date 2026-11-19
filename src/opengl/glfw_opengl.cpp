@@ -4,10 +4,31 @@
 
 extern "C" {
 
+// This can be called from any thread.
+void
+glfwMakeContextCurrent (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+
+  if (!window->gl_context)
+    {
+      do_error_things (GLFW_NO_WINDOW_CONTEXT, "Window did not have an OpenGL context.");
+      return;
+    }
+
+  run_on_main_sync([&]()
+    {
+      if (!SDL_GL_MakeCurrent(window->sdl_window, window->gl_context))
+        do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+    });
+}
+
+// This can be called from any thread.
 void
 glfwSwapBuffers (GLFWwindow *window)
 {
-  glfwInit ();
+  ASSERT_GLFW_INIT_VOID ()
+
   run_on_main_sync([&]()
     {
       if (!SDL_GL_SwapWindow (window->sdl_window))
@@ -15,17 +36,18 @@ glfwSwapBuffers (GLFWwindow *window)
     });
 }
 
-// TODO: negative swap intervals, tearing with swap intervals of 0 (Wayland)?
-// https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_swap_tearing_hint.txt
-// https://github.com/libsdl-org/SDL/issues/16716
+// This can be called from any thread.
 void
 glfwSwapInterval (int interval)
 {
-  glfwInit ();
+  ASSERT_GLFW_INIT_VOID ()
+
   run_on_main_sync([&]()
     {
       if (!SDL_GL_SetSwapInterval (interval))
-        do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+        // We might not support any tearing extensions.
+        if (!SDL_GL_SetSwapInterval (-interval))
+          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
     });
 }
 
