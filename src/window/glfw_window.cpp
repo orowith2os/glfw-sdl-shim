@@ -5,9 +5,44 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_clipboard.h>
 #include <span>
 
 extern "C" {
+
+void
+glfwSetClipboardString (GLFWwindow *, const char* string)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+
+  SDL_SetClipboardText (string);
+}
+
+const char *
+glfwGetClipboardString (GLFWwindow *)
+{
+  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_MAIN_THREAD_PTR ()
+
+  auto text = SDL_GetClipboardText ();
+  if (!text || text[0] == '\0')
+    {
+      SDL_free (text);
+      text = nullptr;
+    }
+
+  return text;
+}
+
+void
+glfwFocusWindow (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+
+  SDL_RaiseWindow (window->sdl_window);
+}
 
 void
 glfwSetWindowIcon (GLFWwindow *window, int count, const GLFWimage *images)
