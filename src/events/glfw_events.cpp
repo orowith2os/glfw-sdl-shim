@@ -10,7 +10,8 @@ static Uint32 shim_wakeup_event_type = 0;
 bool
 glfw_init_events ()
 {
-  shim_wakeup_event_type = SDL_RegisterEvents (1);
+  if (shim_wakeup_event_type == 0)
+    shim_wakeup_event_type = SDL_RegisterEvents (1);
   return shim_wakeup_event_type != 0;
 }
 
@@ -36,6 +37,7 @@ void
 glfwPollEvents ()
 {
   ASSERT_MAIN_THREAD_VOID ()
+  glfw_init_events ();
   drain_event_queue ();
 }
 
@@ -43,6 +45,7 @@ void
 glfwWaitEvents ()
 {
   ASSERT_MAIN_THREAD_VOID ()
+  glfw_init_events ();
 
   SDL_Event event;
   if (SDL_WaitEvent(&event)) {
@@ -58,6 +61,8 @@ void
 glfwWaitEventsTimeout (double timeout)
 {
   ASSERT_MAIN_THREAD_VOID ();
+
+  glfw_init_events ();
 
   if (std::isnan (timeout) || timeout < 0.0)
     {
@@ -78,8 +83,9 @@ glfwWaitEventsTimeout (double timeout)
         return;
     }
 
-  // Possible overflow, but I'd be concerned if a client were waiting that long...
-  Sint32 timeout_ms = timeout * 1000;
+  auto duration = std::chrono::duration<double> (timeout);
+  auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds> (duration);
+  Sint32 timeout_ms = static_cast<Sint32> (duration_ms.count ());
 
   SDL_Event event;
 
@@ -94,8 +100,10 @@ glfwWaitEventsTimeout (double timeout)
 void
 glfwPostEmptyEvent ()
 {
-  if (shim_wakeup_event_type == 0)
-    return;
+  run_on_main_sync([&]()
+    {
+      glfw_init_events ();
+    });
 
   SDL_Event event{};
   event.type = shim_wakeup_event_type;
