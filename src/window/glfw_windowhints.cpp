@@ -8,7 +8,7 @@
 #include <string>
 
 void
-glfwDefaultWindowHints (void)
+glfwDefaultWindowHints ()
 {
   ASSERT_MAIN_THREAD_VOID ()
 
@@ -58,7 +58,7 @@ int_bits_hint_helper (int value, int *place, int *err)
     *place = value;
 }
 
-static void
+void
 bool_hint_helper (int value, bool *place, int *err)
 {
   switch (value)
@@ -70,7 +70,8 @@ bool_hint_helper (int value, bool *place, int *err)
       *place = false;
       break;
     default:
-      *err = GLFW_INVALID_VALUE;
+      if (err)
+        *err = GLFW_INVALID_VALUE;
       break;
     }
 }

@@ -19,6 +19,8 @@
       return nullptr;\
     }\
 
+extern "C" {
+
 const char **
 glfwGetRequiredInstanceExtensions (uint32_t* count)
 {
@@ -68,7 +70,7 @@ glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
 }
 
 int
-glfwVulkanSupported (void)
+glfwVulkanSupported ()
 {
   ENSURE_VULKAN_INIT ()
   ASSERT_GLFW_INIT_INT ()
@@ -158,3 +160,5 @@ glfwCreateWindowSurface (VkInstance instance,
 
   return result;
 }
+
+} // extern "C"

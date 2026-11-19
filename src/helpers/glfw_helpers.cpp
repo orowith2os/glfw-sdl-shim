@@ -11,6 +11,20 @@ glfw_window_from_sdl_window (SDL_Window *sdl_window,
   *window = static_cast<GLFWwindow*>(SDL_GetPointerProperty(props, "gay.oro.glfw_window_pointer", nullptr));
 }
 
+GLFWwindow *
+glfw_window_from_sdl_window_id (SDL_WindowID id)
+{
+  SDL_Window *sdl_window = SDL_GetWindowFromID (id);
+  GLFWwindow *window = nullptr;
+
+  if (!sdl_window)
+    return nullptr;
+
+  glfw_window_from_sdl_window (sdl_window, &window);
+
+  return window;
+}
+
 // https://www.glfw.org/docs/latest/group__errors.html
 std::optional<std::string_view>
 err_to_string (int err)

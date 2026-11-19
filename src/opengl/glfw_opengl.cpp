@@ -2,6 +2,8 @@
 #include "helpers/glfw_helpers.hpp"
 #include "window/glfw_window.hpp"
 
+extern "C" {
+
 void
 glfwSwapBuffers (GLFWwindow *window)
 {
@@ -26,3 +28,5 @@ glfwSwapInterval (int interval)
         do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
     });
 }
+
+} // extern "C"

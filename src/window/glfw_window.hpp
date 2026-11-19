@@ -3,9 +3,6 @@
 #include "helpers/glfw_helpers.hpp"
 #include <SDL3/SDL_video.h>
 
-void
-glfw_window_dispatch_event (SDL_WindowEvent event);
-
 extern "C" {
 
 struct WindowHints
@@ -41,8 +38,13 @@ struct GLFWwindow {
   SDL_GLContext gl_context;
   int client_api;
   bool should_close;
+  GLFWkeyfun key_callback;
+  bool lock_key_mods;
 };
 
 } // extern "C"
 
 inline WindowHints hints;
+
+void
+bool_hint_helper (int value, bool *place, int *err);

@@ -22,6 +22,7 @@ glfw_sdl_shim_sources = [
   'glfw3.cpp',
   'opengl/glfw_opengl.cpp',
   'events/glfw_events.cpp',
+  'events/glfw_dispatchers.cpp',
   'window/glfw_window.cpp',
   'window/glfw_windowhints.cpp',
   'vulkan/glfw_vulkan.cpp',
@@ -33,6 +34,12 @@ glfw_sdl_shim_deps = [
   sdl3_dep,
   gl_dep,
 ]
+
+shared_library('glfw-sdl-shim', glfw_sdl_shim_sources,
+  dependencies: glfw_sdl_shim_deps,
+  include_directories : include_dir,
+  install: true,
+)
 
 executable('glfw-sdl-shim', glfw_sdl_shim_sources,
   dependencies: glfw_sdl_shim_deps,

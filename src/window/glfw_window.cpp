@@ -5,22 +5,85 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
 
+extern "C" {
+
 void
-glfw_window_dispatch_event (SDL_WindowEvent event)
+glfwSetInputMode (GLFWwindow *window, int mode, int value)
 {
-  SDL_Window *sdl_window = SDL_GetWindowFromID(event.windowID);
-  GLFWwindow *window = nullptr;
-
-  if (!sdl_window)
-    return;
-
-  glfw_window_from_sdl_window(sdl_window, &window);
+  ASSERT_MAIN_THREAD_VOID ()
+  int err = GLFW_NO_ERROR;
+  std::string_view ctx = "";
 
   if (!window)
     return;
 
-  if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-    window->should_close = true;
+  switch (mode)
+    {
+    case GLFW_CURSOR:
+    case GLFW_STICKY_KEYS:
+    case GLFW_STICKY_MOUSE_BUTTONS:
+      return; // TODO
+    case GLFW_LOCK_KEY_MODS:
+      bool_hint_helper(value, &window->lock_key_mods, &err);
+      break;
+    case GLFW_RAW_MOUSE_MOTION:
+      return; // TODO?
+    default:
+      err = GLFW_INVALID_ENUM;
+      ctx = "Unknown enum variant for SetWindowHint. File a bug.";
+    }
+
+  if (err == GLFW_INVALID_VALUE && ctx.empty())
+    ctx = "Invalid value for hint";
+
+  do_error_things (err, ctx);
+}
+
+GLFWkeyfun
+glfwSetKeyCallback (GLFWwindow *window, GLFWkeyfun callback)
+{
+  ASSERT_MAIN_THREAD_PTR ()
+
+  GLFWkeyfun old_callback = window->key_callback;
+
+  window->key_callback = callback;
+
+  return old_callback;
+}
+
+void
+glfwGetFramebufferSize (GLFWwindow *window,
+                        int *width, int *height)
+{
+
+  if (width)
+    *width = 0;
+  else
+    return;
+
+  if (height)
+    *height = 0;
+  else
+    return;
+
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_GLFW_INIT_VOID ()
+
+  if (!window)
+    {
+      do_error_things (GLFW_INVALID_VALUE, "Didn't pass a window to glfwGetFramebufferSize.");
+      return;
+    }
+
+  int w = 0, h = 0;
+  if (!SDL_GetWindowSizeInPixels(window->sdl_window, &w, &h))
+    {
+      do_error_things(GLFW_PLATFORM_ERROR, SDL_GetError());
+      return;
+    }
+
+  *width = w;
+  *height = h;
 }
 
 void
@@ -31,7 +94,8 @@ glfwDestroyWindow (GLFWwindow *window)
 }
 
 int
-glfwWindowShouldClose (GLFWwindow *window) {
+glfwWindowShouldClose (GLFWwindow *window)
+{
   if (!window)
     {
       do_error_things(GLFW_INVALID_VALUE, "No window was passed to glfwWindowShouldClose");
@@ -40,6 +104,15 @@ glfwWindowShouldClose (GLFWwindow *window) {
     }
 
   return window->should_close ? GLFW_TRUE : GLFW_FALSE;
+}
+
+void
+glfwSetWindowShouldClose (GLFWwindow *window, int value)
+{
+  if (!window)
+    do_error_things(GLFW_INVALID_VALUE, "No window was passed to glfwSetWindowShouldClose");
+  else
+    window->should_close = value ? true : false;
 }
 
 GLFWwindow *
@@ -161,3 +234,5 @@ glfwMakeContextCurrent (GLFWwindow *window)
         do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
     });
 }
+
+} // extern "C"

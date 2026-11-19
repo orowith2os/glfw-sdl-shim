@@ -4,6 +4,7 @@
 
 #include <SDL3/SDL_events.h>
 #include "window/glfw_window.hpp"
+#include "glfw_dispatchers.hpp"
 
 static Uint32 shim_wakeup_event_type = 0;
 
@@ -20,6 +21,8 @@ dispatch_event (SDL_Event event)
 {
   if (event.type >= SDL_EVENT_WINDOW_FIRST && event.type <= SDL_EVENT_WINDOW_LAST)
     glfw_window_dispatch_event (event.window);
+  else if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+    glfw_key_dispatch_event (event.key);
 }
 
 static void
@@ -32,6 +35,8 @@ drain_event_queue()
         dispatch_event (event);
     }
 }
+
+extern "C" {
 
 void
 glfwPollEvents ()
@@ -111,3 +116,5 @@ glfwPostEmptyEvent ()
   if (!SDL_PushEvent(&event))
     do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
 }
+
+} // extern "C"

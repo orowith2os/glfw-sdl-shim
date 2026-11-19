@@ -5,7 +5,9 @@
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_vulkan.h>
+#include <SDL3/SDL_timer.h>
 
+#include <cmath>
 #include <string>
 #include <format>
 #include <atomic>
@@ -274,6 +276,28 @@ glfwGetVersionString ()
 {
   // This (can) have some debug info that may be useful to users and devs
   return SHIM_VERSION_STRING;
+}
+
+double
+glfwGetTime ()
+{
+  glfwInit ();
+
+  Uint64 now_ms = SDL_GetTicks ();
+  return static_cast<double> (now_ms - state.timer_offset) / 1e9;
+}
+
+void
+glfwSetTime (double time)
+{
+  glfwInit ();
+
+  if (!std::isfinite(time) || time < 0.0 || time > 18446744073.0)
+  {
+    do_error_things(GLFW_INVALID_VALUE, "Invalid value passed to glfwSetTime.");
+    return;
+  }
+
 }
 
 } // extern "C"
