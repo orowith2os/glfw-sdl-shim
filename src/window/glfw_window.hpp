@@ -38,6 +38,7 @@ struct GLFWwindow {
   SDL_Window *sdl_window = nullptr;
   SDL_GLContext gl_context = nullptr;
   int client_api = GLFW_OPENGL_API;
+  SDL_WindowFlags flags = 0;
   bool should_close = false;
   GLFWkeyfun key_callback = nullptr;
   bool lock_key_mods = false;

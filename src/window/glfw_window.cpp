@@ -283,7 +283,7 @@ glfwSetInputMode (GLFWwindow *window, int mode, int value)
       return; // TODO?
     default:
       err = GLFW_INVALID_ENUM;
-      ctx = "Unknown enum variant for SetWindowHint. File a bug.";
+      ctx = "Unknown enum variant for glfwSetInputMode. File a bug.";
     }
 
   if (err == GLFW_INVALID_VALUE && ctx.empty())
@@ -430,6 +430,7 @@ glfwCreateWindow (int width, int height,
 
   window->client_api = hints.client_api;
   window->focus_on_show = hints.focus_on_show;
+  window->flags = flags;
 
   if (hints.debug_context)
     context_flags |= SDL_GL_CONTEXT_DEBUG_FLAG;

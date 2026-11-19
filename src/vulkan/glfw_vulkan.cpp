@@ -6,6 +6,7 @@
 #include "window/glfw_window.hpp"
 
 #include <SDL3/SDL_vulkan.h>
+#include <SDL3/SDL_video.h>
 
 #include <print>
 
@@ -33,6 +34,7 @@ const char **
 glfwGetRequiredInstanceExtensions (uint32_t* count)
 {
   ASSERT_GLFW_INIT_PTR ()
+  ENSURE_VULKAN_INIT ()
   ASSERT_VULKAN_LOADED_PTR ()
 
   const char **result = nullptr;
@@ -156,6 +158,19 @@ glfwCreateWindowSurface (VkInstance instance,
 
   run_on_main_sync ([&]()
     {
+      std::string title;
+      int w, h = 0;
+      // By default, this is made as an OpenGL (or with no specific type at
+      // all), so recreate it if need be.
+      if (window->sdl_window)
+        {
+          title = glfwGetWindowTitle (window);
+          glfwGetWindowSize (window, &w, &h);
+          SDL_DestroyWindow (window->sdl_window);
+          window->flags |= SDL_WINDOW_VULKAN;
+          window->sdl_window = SDL_CreateWindow (title.c_str (), w, h, window->flags);
+        }
+
       if (!SDL_Vulkan_CreateSurface(window->sdl_window,
                                     instance,
                                     allocator,

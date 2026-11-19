@@ -37,6 +37,7 @@ glfw_sdl_shim_sources = [
 glfw_sdl_shim_deps = [
   sdl3_dep,
   gl_dep,
+  vk_dep,
 ]
 
 shared_library('glfw-sdl-shim', glfw_sdl_shim_sources,

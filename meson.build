@@ -8,5 +8,6 @@ include_dir = include_directories('include')
 
 sdl3_dep = dependency('SDL3')
 gl_dep = dependency('gl')
+vk_dep = dependency('vulkan')
 
 subdir('src')
