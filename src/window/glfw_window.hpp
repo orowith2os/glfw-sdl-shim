@@ -10,7 +10,12 @@ struct WindowHints
   SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE |
                           SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
-  int api = GLFW_OPENGL_API;
+  int client_api = GLFW_OPENGL_ANY_PROFILE;
+  int opengl_profile = 0;
+  int opengl_version_major = 1;
+  int opengl_version_minor = 0;
+  bool forward_compat = false;
+  bool debug_context = false;
 
   // GL and framebuffer BS
   int red_bits = 8;

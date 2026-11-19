@@ -149,6 +149,54 @@ glfwWindowHint (int hint, int value)
     case GLFW_DOUBLEBUFFER:
       bool_hint_helper (value, &hints.doublebuffer, &err);
       break;
+    case GLFW_CLIENT_API:
+      if (value == GLFW_OPENGL_API ||
+          value == GLFW_OPENGL_ES_API ||
+          value == GLFW_NO_API)
+        hints.client_api = value;
+      else
+        {
+          err = GLFW_INVALID_VALUE;
+          ctx = "Passed an unknown API for GLFW_CLIENT_API.";
+        }
+      break;
+    case GLFW_CONTEXT_VERSION_MAJOR:
+      if (value < 0)
+        {
+          err = GLFW_INVALID_VALUE;
+          ctx = "Passed a negative value for GLFW_CONTEXT_VERSION_MAJOR";
+        }
+      hints.opengl_version_major = value;
+      break;
+    case GLFW_CONTEXT_VERSION_MINOR:
+      if (value < 0)
+        {
+          err = GLFW_INVALID_VALUE;
+          ctx = "Passed a negative value for GLFW_CONTEXT_VERSION_MINOR.";
+        }
+      else
+        hints.opengl_version_minor = value;
+      break;
+    case GLFW_OPENGL_PROFILE:
+      if (value == GLFW_OPENGL_CORE_PROFILE)
+        hints.opengl_profile = SDL_GL_CONTEXT_PROFILE_CORE;
+      else if (value == GLFW_OPENGL_COMPAT_PROFILE)
+        hints.opengl_profile = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
+      else if (value == GLFW_OPENGL_ANY_PROFILE)
+        hints.opengl_profile = 0;
+      else
+        {
+          err = GLFW_INVALID_VALUE;
+          ctx = "Unknown OpenGL profile passed for GLFW_OPENGL_PROFILE.";
+        }
+      break;
+    case GLFW_OPENGL_FORWARD_COMPAT:
+      bool_hint_helper (value, &hints.forward_compat, &err);
+      break;
+    case GLFW_OPENGL_DEBUG_CONTEXT:
+      bool_hint_helper (value, &hints.debug_context, &err);
+      break;
+
     default:
       err = GLFW_INVALID_ENUM;
       ctx = "Unknown enum variant for SetWindowHint. File a bug.";
