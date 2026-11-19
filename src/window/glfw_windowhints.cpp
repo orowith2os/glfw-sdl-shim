@@ -110,7 +110,8 @@ glfwWindowHint (int hint, int value)
       bool_flags_hint_helper (value, SDL_WINDOW_TRANSPARENT, &err);
       break;
     case GLFW_FOCUS_ON_SHOW:
-      return; // Not supported per-window on SDL
+      bool_hint_helper (value, &hints.focus_on_show, &err);
+      break;
     case GLFW_SCALE_TO_MONITOR:
       return; // Not supported/TODO?
     case GLFW_SCALE_FRAMEBUFFER:

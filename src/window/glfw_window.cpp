@@ -4,8 +4,31 @@
 
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_hints.h>
 
 extern "C" {
+
+void
+glfwShowWindow (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window || !window->sdl_window)
+    return;
+
+  SDL_WindowFlags flags = SDL_GetWindowFlags (window->sdl_window);
+
+  // no-op if already visible or fullscreen
+  if (!(flags & SDL_WINDOW_HIDDEN) || (flags & SDL_WINDOW_FULLSCREEN))
+    return;
+
+  // GLFW_FOCUS_ON_SHOW
+  SDL_SetHint (SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, window->focus_on_show ? "1" : "0");
+
+  SDL_ShowWindow (window->sdl_window);
+
+  SDL_SetHint (SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, "1");
+}
 
 void
 glfwSetInputMode (GLFWwindow *window, int mode, int value)
@@ -163,13 +186,14 @@ glfwCreateWindow (int width, int height,
       break; // client handles this itself
     }
 
-    window->client_api = hints.client_api;
+  window->client_api = hints.client_api;
+  window->focus_on_show = hints.focus_on_show;
 
-    if (hints.debug_context)
-      context_flags |= SDL_GL_CONTEXT_DEBUG_FLAG;
+  if (hints.debug_context)
+    context_flags |= SDL_GL_CONTEXT_DEBUG_FLAG;
+  if (hints.forward_compat)
+    context_flags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
-    if (hints.forward_compat)
-      context_flags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
   bool result = run_on_main_sync ([&]()
     {

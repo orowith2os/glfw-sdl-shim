@@ -27,6 +27,8 @@ struct WindowHints
   bool srgb_capable = false;
   bool doublebuffer = true;
 
+  bool focus_on_show = true;
+
   std::string wayland_app_id;
 };
 
@@ -40,6 +42,7 @@ struct GLFWwindow {
   GLFWkeyfun key_callback = nullptr;
   bool lock_key_mods = false;
   GLFWcursor *cursor = nullptr;
+  bool focus_on_show = false;
 
   ~GLFWwindow ()
     {
