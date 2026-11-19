@@ -87,34 +87,34 @@ glfwWindowHint (int hint, int value)
   switch (hint)
     {
     case GLFW_RESIZABLE:
-      bool_flags_hint_helper(value, SDL_WINDOW_RESIZABLE, &err);
+      bool_flags_hint_helper (value, SDL_WINDOW_RESIZABLE, &err);
       break;
     case GLFW_VISIBLE:
-      bool_flags_hint_helper_inverted(value, SDL_WINDOW_HIDDEN, &err);
+      bool_flags_hint_helper_inverted (value, SDL_WINDOW_HIDDEN, &err);
       break;
     case GLFW_DECORATED:
-      bool_flags_hint_helper_inverted(value, SDL_WINDOW_BORDERLESS, &err);
+      bool_flags_hint_helper_inverted (value, SDL_WINDOW_BORDERLESS, &err);
       break;
     case GLFW_FOCUSED:
     case GLFW_AUTO_ICONIFY:
       return; // global hint, not per-window, in SDL
     case GLFW_FLOATING:
-      bool_flags_hint_helper(value, SDL_WINDOW_ALWAYS_ON_TOP, &err);
+      bool_flags_hint_helper (value, SDL_WINDOW_ALWAYS_ON_TOP, &err);
       break;
     case GLFW_MAXIMIZED:
-      bool_flags_hint_helper(value, SDL_WINDOW_MAXIMIZED, &err);
+      bool_flags_hint_helper (value, SDL_WINDOW_MAXIMIZED, &err);
       break;
     case GLFW_CENTER_CURSOR:
       return; // TODO: need to handle manually. Warp cursor to center.
     case GLFW_TRANSPARENT_FRAMEBUFFER:
-      bool_flags_hint_helper(value, SDL_WINDOW_TRANSPARENT, &err);
+      bool_flags_hint_helper (value, SDL_WINDOW_TRANSPARENT, &err);
       break;
     case GLFW_FOCUS_ON_SHOW:
       return; // Not supported per-window on SDL
     case GLFW_SCALE_TO_MONITOR:
       return; // Not supported/TODO?
     case GLFW_SCALE_FRAMEBUFFER:
-      bool_flags_hint_helper(value, SDL_WINDOW_HIGH_PIXEL_DENSITY, &err);
+      bool_flags_hint_helper (value, SDL_WINDOW_HIGH_PIXEL_DENSITY, &err);
       break;
     case GLFW_MOUSE_PASSTHROUGH:
       return; // TODO? SDL_SetWindowMousePassthrough
@@ -124,25 +124,25 @@ glfwWindowHint (int hint, int value)
 
     // GL BS
     case GLFW_RED_BITS:
-      int_bits_hint_helper(value, &hints.red_bits, &err);
+      int_bits_hint_helper (value, &hints.red_bits, &err);
       break;
     case GLFW_GREEN_BITS:
-      int_bits_hint_helper(value, &hints.green_bits, &err);
+      int_bits_hint_helper (value, &hints.green_bits, &err);
       break;
     case GLFW_BLUE_BITS:
-      int_bits_hint_helper(value, &hints.blue_bits, &err);
+      int_bits_hint_helper (value, &hints.blue_bits, &err);
       break;
     case GLFW_ALPHA_BITS:
-      int_bits_hint_helper(value, &hints.alpha_bits, &err);
+      int_bits_hint_helper (value, &hints.alpha_bits, &err);
       break;
     case GLFW_DEPTH_BITS:
-      int_bits_hint_helper(value, &hints.depth_bits, &err);
+      int_bits_hint_helper (value, &hints.depth_bits, &err);
       break;
     case GLFW_STENCIL_BITS:
-      int_bits_hint_helper(value, &hints.stencil_bits, &err);
+      int_bits_hint_helper (value, &hints.stencil_bits, &err);
       break;
     case GLFW_SAMPLES:
-      int_bits_hint_helper(value, &hints.samples, &err);
+      int_bits_hint_helper (value, &hints.samples, &err);
       break;
     case GLFW_SRGB_CAPABLE:
       bool_hint_helper (value, &hints.srgb_capable, &err);

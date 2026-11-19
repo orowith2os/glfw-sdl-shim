@@ -105,7 +105,7 @@ glfwWaitEventsTimeout (double timeout)
 void
 glfwPostEmptyEvent ()
 {
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       glfw_init_events ();
     });

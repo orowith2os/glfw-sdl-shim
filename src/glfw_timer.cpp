@@ -30,7 +30,7 @@ glfwGetTime ()
   if (!state.initialized)
     return 0.0;
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       const uint64_t elapsed = SDL_GetTicks () - state.base_time_ms;
       time = static_cast<double> (state.timer_start_ms + elapsed) / 1000.0;
@@ -54,7 +54,7 @@ glfwSetTime (double time_s)
 
 uint64_t time = seconds_to_ms (time_s);
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       state.base_time_ms = SDL_GetTicks ();
       state.timer_start_ms = time;

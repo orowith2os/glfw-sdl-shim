@@ -68,7 +68,7 @@ glfwInitVulkanLoader (PFN_vkGetInstanceProcAddr loader)
     // We'd need to deal with extension stuff ourselves...
     std::println ("Ignoring custom Vulkan loader argument. This isn't compatible, for now at least.");
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       if (SDL_Vulkan_LoadLibrary (nullptr))
           state.vulkan_loaded = true;

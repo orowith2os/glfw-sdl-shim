@@ -5,6 +5,27 @@
 extern "C" {
 
 // This can be called from any thread.
+int
+glfwExtensionSupported (const char *extension)
+{
+  int val;
+  ASSERT_GLFW_INIT_INT ()
+
+  if (!extension || *extension == '\0')
+    return GLFW_FALSE;
+
+  run_on_main_sync ([&]()
+    {
+      if (!SDL_GL_GetCurrentContext ())
+        val = GLFW_FALSE;
+
+      val = SDL_GL_ExtensionSupported (extension) ? GLFW_TRUE : GLFW_FALSE;
+    });
+
+  return val;
+}
+
+// This can be called from any thread.
 void
 glfwMakeContextCurrent (GLFWwindow *window)
 {
@@ -16,7 +37,7 @@ glfwMakeContextCurrent (GLFWwindow *window)
       return;
     }
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       if (!SDL_GL_MakeCurrent(window->sdl_window, window->gl_context))
         do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
@@ -29,7 +50,7 @@ glfwSwapBuffers (GLFWwindow *window)
 {
   ASSERT_GLFW_INIT_VOID ()
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       if (!SDL_GL_SwapWindow (window->sdl_window))
         do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
@@ -42,7 +63,7 @@ glfwSwapInterval (int interval)
 {
   ASSERT_GLFW_INIT_VOID ()
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       if (!SDL_GL_SetSwapInterval (interval))
         // We might not support any tearing extensions.

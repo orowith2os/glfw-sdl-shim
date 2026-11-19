@@ -24,7 +24,7 @@ glfwSetInputMode (GLFWwindow *window, int mode, int value)
     case GLFW_STICKY_MOUSE_BUTTONS:
       return; // TODO
     case GLFW_LOCK_KEY_MODS:
-      bool_hint_helper(value, &window->lock_key_mods, &err);
+      bool_hint_helper (value, &window->lock_key_mods, &err);
       break;
     case GLFW_RAW_MOUSE_MOTION:
       return; // TODO?
@@ -76,9 +76,9 @@ glfwGetFramebufferSize (GLFWwindow *window,
     }
 
   int w = 0, h = 0;
-  if (!SDL_GetWindowSizeInPixels(window->sdl_window, &w, &h))
+  if (!SDL_GetWindowSizeInPixels (window->sdl_window, &w, &h))
     {
-      do_error_things(GLFW_PLATFORM_ERROR, SDL_GetError());
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError());
       return;
     }
 
@@ -103,12 +103,12 @@ glfwWindowShouldClose (GLFWwindow *window)
   int val;
   if (!window)
     {
-      do_error_things(GLFW_INVALID_VALUE, "No window was passed to glfwWindowShouldClose");
+      do_error_things (GLFW_INVALID_VALUE, "No window was passed to glfwWindowShouldClose");
       // We want them to discard it.
       return GLFW_TRUE;
     }
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&]()
     {
       val = window->should_close ? GLFW_TRUE : GLFW_FALSE;
     });
@@ -123,9 +123,9 @@ glfwSetWindowShouldClose (GLFWwindow *window, int value)
   ASSERT_GLFW_INIT_VOID ()
 
   if (!window)
-    do_error_things(GLFW_INVALID_VALUE, "No window was passed to glfwSetWindowShouldClose");
+    do_error_things (GLFW_INVALID_VALUE, "No window was passed to glfwSetWindowShouldClose");
   else
-    run_on_main_sync([&]()
+    run_on_main_sync ([&]()
       {
         window->should_close = (value == GLFW_TRUE) ? true : false;
       });
@@ -171,7 +171,7 @@ glfwCreateWindow (int width, int height,
     if (hints.forward_compat)
       context_flags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
-  bool result = run_on_main_sync([&]()
+  bool result = run_on_main_sync ([&]()
     {
       window->sdl_window = SDL_CreateWindow (title, width, height, flags);
 
