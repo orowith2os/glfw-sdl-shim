@@ -47,6 +47,16 @@ glfwSetWindowIcon (GLFWwindow *window, int count, const GLFWimage *images)
     }
 }
 
+const char *
+glfwGetWindowTitle (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_MAIN_THREAD_PTR ()
+  if (!window || !window->sdl_window)
+    return nullptr;
+
+  return SDL_GetWindowTitle (window->sdl_window);
+}
 
 void
 glfwSetWindowTitle (GLFWwindow *window, const char *title)
