@@ -21,6 +21,17 @@
     ],
     "modules" : [
         {
+            "name": "sdl3",
+            "buildsystem": "cmake",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/libsdl-org/sdl.git",
+                    "branch": "main"
+                }
+            ]
+        },
+        {
             "name" : "glfw-sdl-shim",
             "buildsystem" : "meson",
             "sources" : [
