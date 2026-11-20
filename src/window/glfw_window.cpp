@@ -13,59 +13,6 @@
 extern "C" {
 
 void
-glfwSetWindowSizeLimits (GLFWwindow *window,
-                         int minwidth, int minheight,
-                         int maxwidth, int maxheight)
-{
-  ASSERT_GLFW_INIT_VOID ()
-  ASSERT_MAIN_THREAD_VOID ()
-  if (!window)
-    return;
-
-  if ((minwidth != GLFW_DONT_CARE && minwidth < 0) ||
-      (minheight != GLFW_DONT_CARE && minheight < 0) ||
-      (maxwidth != GLFW_DONT_CARE && maxwidth < 0) ||
-      (maxheight != GLFW_DONT_CARE && maxheight < 0))
-    {
-      std::string err = std::format ("Passed invalid size to glfwSetWindowSizeLimits: "
-                                     "minwidth {}, minheight {}, maxwidth {}, maxheight {}",
-                                     minwidth, minheight, maxwidth, maxheight);
-      do_error_things (GLFW_INVALID_VALUE, err);
-      return;
-    }
-
-  if ((minwidth != GLFW_DONT_CARE &&
-       maxwidth != GLFW_DONT_CARE &&
-       maxwidth < minwidth) ||
-      (minheight != GLFW_DONT_CARE &&
-       maxheight != GLFW_DONT_CARE &&
-       maxheight < minheight))
-    {
-      if (maxwidth < minwidth)
-        do_error_things (GLFW_INVALID_VALUE, "glfwSetWindowSizeLimits: maxwidth was smaller than minwidth");
-      if (maxheight < minheight)
-        do_error_things (GLFW_INVALID_VALUE, "glfwSetWindowSizeLimits: maxheight was smaller than maxheight");
-      return;
-    }
-
-  // no-op
-  SDL_WindowFlags flags = SDL_GetWindowFlags(window->sdl_window);
-  if (!(flags & SDL_WINDOW_RESIZABLE))
-    return;
-
-  // map GLFW_DONT_CARE (-1) to SDL3's 0 (unlimited)
-  int sdl_min_w = (minwidth == GLFW_DONT_CARE) ? 0 : minwidth;
-  int sdl_min_h = (minheight == GLFW_DONT_CARE) ? 0 : minheight;
-  int sdl_max_w = (maxwidth == GLFW_DONT_CARE) ? 0 : maxwidth;
-  int sdl_max_h = (maxheight == GLFW_DONT_CARE) ? 0 : maxheight;
-
-  if (!SDL_SetWindowMinimumSize (window->sdl_window, sdl_min_w, sdl_min_h))
-    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
-  if (!SDL_SetWindowMaximumSize (window->sdl_window, sdl_max_w, sdl_max_h))
-    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
-}
-
-void
 glfwGetWindowPos (GLFWwindow* window, int* xpos, int* ypos)
 {
   if (xpos)
@@ -314,39 +261,6 @@ glfwShowWindow (GLFWwindow *window)
   SDL_SetHint (SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, "1");
 }
 
-void
-glfwSetInputMode (GLFWwindow *window, int mode, int value)
-{
-  ASSERT_GLFW_INIT_VOID ()
-  ASSERT_MAIN_THREAD_VOID ()
-  if (!window)
-    return;
-
-  int err = GLFW_NO_ERROR;
-  std::string_view ctx = "";
-
-  switch (mode)
-    {
-    case GLFW_CURSOR:
-    case GLFW_STICKY_KEYS:
-    case GLFW_STICKY_MOUSE_BUTTONS:
-      return; // TODO
-    case GLFW_LOCK_KEY_MODS:
-      bool_hint_helper (value, &window->lock_key_mods, &err);
-      break;
-    case GLFW_RAW_MOUSE_MOTION:
-      return; // TODO?
-    default:
-      err = GLFW_INVALID_ENUM;
-      ctx = "Unknown enum variant for glfwSetInputMode. File a bug.";
-    }
-
-  if (err == GLFW_INVALID_VALUE && ctx.empty())
-    ctx = "Invalid value for hint";
-
-  do_error_things (err, ctx);
-}
-
 GLFWscrollfun
 glfwSetScrollCallback (GLFWwindow *window, GLFWscrollfun callback)
 {
@@ -473,7 +387,6 @@ glfwCreateWindow (int width, int height,
   if (monitor)
     flags |= SDL_WINDOW_FULLSCREEN;
 
-  const char *platform = SDL_GetPlatform ();
   switch (hints.client_api)
     {
     case GLFW_OPENGL_API:
@@ -481,16 +394,13 @@ glfwCreateWindow (int width, int height,
       flags |= SDL_WINDOW_OPENGL;
       break;
     case GLFW_NO_API:
-      // Default to a Metal window, just in case. If it's Vulkan, the
-      // CreateSurface GLFW function will recreate the SDL surface
-      // with Vulkan flags.
-      if (SDL_strcmp (platform, "macOS") == 0)
-        flags |= SDL_WINDOW_METAL;
       break; // client handles this itself
     }
 
   window->client_api = hints.client_api;
   window->focus_on_show = hints.focus_on_show;
+  window->fullscreen_center_cursor_on_first_focus =
+    monitor ? hints.fullscreen_center_cursor_on_first_focus : false;
   window->flags = flags;
 
   if (hints.debug_context)
@@ -498,22 +408,8 @@ glfwCreateWindow (int width, int height,
   if (hints.forward_compat)
     context_flags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 
-
-  bool result = run_on_main_sync ([&]()
+  if (hints.client_api != GLFW_NO_API)
     {
-      window->sdl_window = SDL_CreateWindow (title, width, height, flags);
-
-      if (!window->sdl_window)
-        {
-          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
-          delete window;
-          window = nullptr;
-        }
-
-      // Don't bother with GL if the client is handling it.
-      if (hints.client_api == GLFW_NO_API)
-        return;
-
       SDL_GL_SetAttribute (SDL_GL_CONTEXT_MAJOR_VERSION, hints.opengl_version_major);
       SDL_GL_SetAttribute (SDL_GL_CONTEXT_MINOR_VERSION, hints.opengl_version_minor);
       SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, hints.doublebuffer);
@@ -521,24 +417,35 @@ glfwCreateWindow (int width, int height,
       SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, context_flags);
 
       // Bits. max them in case of GLFW_DONT_CARE
-      SDL_GL_SetAttribute (SDL_GL_RED_SIZE,     std::max(0, hints.red_bits));
-      SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE,   std::max(0, hints.green_bits));
-      SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE,    std::max(0, hints.blue_bits));
-      SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE,   std::max(0, hints.alpha_bits));
-      SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE,   std::max(0, hints.depth_bits));
-      SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, std::max(0, hints.stencil_bits));
-      SDL_GL_SetAttribute (SDL_GL_MULTISAMPLEBUFFERS, (hints.samples > 0)
-                                                       ? 1 : 0);
-
+      SDL_GL_SetAttribute (SDL_GL_RED_SIZE,     std::max (0, hints.red_bits));
+      SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE,   std::max (0, hints.green_bits));
+      SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE,    std::max (0, hints.blue_bits));
+      SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE,   std::max (0, hints.alpha_bits));
+      SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE,   std::max (0, hints.depth_bits));
+      SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, std::max (0, hints.stencil_bits));
+      SDL_GL_SetAttribute (SDL_GL_MULTISAMPLEBUFFERS, (hints.samples > 0) ? 1 : 0);
       SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, std::max (0, hints.samples));
+    }
 
+  window->sdl_window = SDL_CreateWindow (title, width, height, flags);
+
+  if (!window->sdl_window)
+    {
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      delete window;
+      return nullptr;
+    }
+
+  if (hints.client_api != GLFW_NO_API)
+    {
       if (share && share->gl_context)
         {
           if (!SDL_GL_MakeCurrent (share->sdl_window, share->gl_context))
             {
-              delete window;
-              window = nullptr;
               do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+              SDL_DestroyWindow (window->sdl_window);
+              delete window;
+              return nullptr;
             }
 
           SDL_GL_SetAttribute (SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
@@ -547,18 +454,19 @@ glfwCreateWindow (int width, int height,
       window->gl_context = SDL_GL_CreateContext (window->sdl_window);
       SDL_GL_SetAttribute (SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
 
-      SDL_GL_MakeCurrent(window->sdl_window, window->gl_context);
+      if (!window->gl_context)
+        {
+          do_error_things (GLFW_API_UNAVAILABLE, SDL_GetError ());
+          SDL_DestroyWindow (window->sdl_window);
+          delete window;
+          return nullptr;
+        }
 
-      SDL_PropertiesID props = SDL_GetWindowProperties (window->sdl_window);
-      SDL_SetPointerProperty (props, "gay.oro.glfw_window_pointer", window);
-    });
-
-  if (!result || !window->sdl_window)
-    {
-      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
-      delete window;
-      return nullptr;
+      SDL_GL_MakeCurrent (window->sdl_window, window->gl_context);
     }
+
+  SDL_PropertiesID props = SDL_GetWindowProperties (window->sdl_window);
+  SDL_SetPointerProperty (props, "gay.oro.glfw_window_pointer", window);
 
   return window;
 }

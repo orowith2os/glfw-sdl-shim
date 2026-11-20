@@ -16,6 +16,9 @@ struct GLFWcursor {
     }
 };
 
+void
+do_thing_with_cursor_mode (GLFWwindow *window);
+
 [[nodiscard]] constexpr SDL_SystemCursor
 glfw_cursor_int_to_sdl_system_cursor (int cursor) noexcept
 {

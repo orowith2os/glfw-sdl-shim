@@ -6,6 +6,44 @@
 #include <algorithm>
 
 void
+do_thing_with_cursor_mode (GLFWwindow *window)
+{
+  if (!window || !window->sdl_window)
+    return;
+
+  switch (window->cursor_mode)
+    {
+    case GLFW_CURSOR_NORMAL:
+      SDL_SetWindowRelativeMouseMode (window->sdl_window, false);
+      SDL_SetWindowMouseGrab (window->sdl_window, false);
+      SDL_ShowCursor ();
+      break;
+
+    case GLFW_CURSOR_HIDDEN:
+      SDL_SetWindowRelativeMouseMode (window->sdl_window, false);
+      SDL_SetWindowMouseGrab (window->sdl_window, false);
+      if (SDL_GetWindowFlags (window->sdl_window) & SDL_WINDOW_MOUSE_FOCUS)
+        SDL_HideCursor ();
+      else
+        SDL_ShowCursor ();
+      break;
+
+    // TODO: ????? why does this not work???
+    case GLFW_CURSOR_CAPTURED:
+      SDL_ShowCursor ();
+      SDL_SetWindowRelativeMouseMode (window->sdl_window, false);
+      SDL_SetWindowMouseGrab (window->sdl_window, true);
+      break;
+
+    case GLFW_CURSOR_DISABLED:
+      SDL_HideCursor ();
+      SDL_SetWindowMouseGrab (window->sdl_window, false);
+      SDL_SetWindowRelativeMouseMode (window->sdl_window, true);
+      break;
+    }
+}
+
+void
 glfw_cursor_focus_dispatch_event (SDL_WindowEvent event)
 {
   if (event.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
@@ -15,6 +53,7 @@ glfw_cursor_focus_dispatch_event (SDL_WindowEvent event)
         SDL_SetCursor (window->cursor
                          ? window->cursor->sdl_cursor
                          : SDL_GetDefaultCursor ());
+      do_thing_with_cursor_mode (window);
     }
 }
 

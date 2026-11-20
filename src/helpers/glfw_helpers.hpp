@@ -45,6 +45,7 @@ struct ShimGlobalState {
   uint64_t timer_start_ms = 0;
   uint64_t base_time_ms = 0;
   GLFWjoystickfun joystick_callback = nullptr;
+  GLFWwindow *focused_window;
 };
 
 // https://www.glfw.org/docs/3.3/intro_guide.html#error_handling

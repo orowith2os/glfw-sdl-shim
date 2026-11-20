@@ -6,6 +6,7 @@
 
 #include <string_view>
 #include <string>
+#include <format>
 
 void
 glfwDefaultWindowHints ()
@@ -105,7 +106,8 @@ glfwWindowHint (int hint, int value)
       bool_flags_hint_helper (value, SDL_WINDOW_MAXIMIZED, &err);
       break;
     case GLFW_CENTER_CURSOR:
-      return; // TODO: need to handle manually. Warp cursor to center.
+      bool_hint_helper (value, &hints.fullscreen_center_cursor_on_first_focus, &err);
+      return;
     case GLFW_TRANSPARENT_FRAMEBUFFER:
       bool_flags_hint_helper (value, SDL_WINDOW_TRANSPARENT, &err);
       break;
@@ -157,10 +159,16 @@ glfwWindowHint (int hint, int value)
           value == GLFW_NO_API)
         hints.client_api = value;
       else
-        {
-          err = GLFW_INVALID_VALUE;
-          ctx = "Passed an unknown API for GLFW_CLIENT_API.";
-        }
+        err = GLFW_INVALID_VALUE;
+      break;
+    // Ignored, since SDL doesn't have an exact equivalent.
+    // We just want platform-native everywhere. OSmesa was also
+    // removed in Mesa as of 25.1.
+    case GLFW_CONTEXT_CREATION_API:
+      if (value != GLFW_NATIVE_CONTEXT_API &&
+          value != GLFW_EGL_CONTEXT_API &&
+          value != GLFW_OSMESA_CONTEXT_API)
+        err = GLFW_INVALID_VALUE;
       break;
     case GLFW_CONTEXT_VERSION_MAJOR:
       if (value < 0)
@@ -187,10 +195,7 @@ glfwWindowHint (int hint, int value)
       else if (value == GLFW_OPENGL_ANY_PROFILE)
         hints.opengl_profile = 0;
       else
-        {
-          err = GLFW_INVALID_VALUE;
-          ctx = "Unknown OpenGL profile passed for GLFW_OPENGL_PROFILE.";
-        }
+        err = GLFW_INVALID_VALUE;
       break;
     case GLFW_OPENGL_FORWARD_COMPAT:
       bool_hint_helper (value, &hints.forward_compat, &err);
@@ -201,7 +206,7 @@ glfwWindowHint (int hint, int value)
 
     default:
       err = GLFW_INVALID_ENUM;
-      ctx = "Unknown enum variant for SetWindowHint. File a bug.";
+      ctx = "Unknown enum variant for glfwWindowHint. File a bug, if it's supposed to be valid.";
     }
 
   if (err == GLFW_INVALID_VALUE && ctx.empty())
@@ -245,4 +250,135 @@ glfwWindowHintString (int hint, const char* value)
 
   if (err != GLFW_NO_ERROR)
     do_error_things (err, ctx);
+}
+
+int
+glfwGetInputMode (GLFWwindow *window, int mode)
+{
+  ASSERT_GLFW_INIT_INT ()
+  ASSERT_MAIN_THREAD_INT ()
+  if (!window)
+    return GLFW_FALSE;
+
+  int err = GLFW_NO_ERROR;
+  std::string_view ctx = "";
+
+  switch (mode)
+    {
+    case GLFW_CURSOR:
+      return window->cursor_mode;
+    case GLFW_STICKY_KEYS:
+    case GLFW_STICKY_MOUSE_BUTTONS:
+    case GLFW_LOCK_KEY_MODS:
+    case GLFW_RAW_MOUSE_MOTION:
+    case GLFW_UNLIMITED_MOUSE_BUTTONS:
+      return GLFW_FALSE; // TODO?
+    default:
+      err = GLFW_INVALID_ENUM;
+      ctx = "Unknown enum variant for glfwSetInputMode. File a bug.";
+    }
+
+  do_error_things (err, ctx);
+}
+
+void
+glfwSetInputMode (GLFWwindow *window, int mode, int value)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window)
+    return;
+
+  int err = GLFW_NO_ERROR;
+  std::string_view ctx = "";
+
+  switch (mode)
+    {
+    case GLFW_CURSOR:
+      switch (value)
+        {
+        case GLFW_CURSOR_NORMAL:
+        case GLFW_CURSOR_HIDDEN:
+        case GLFW_CURSOR_DISABLED:
+        case GLFW_CURSOR_CAPTURED:
+          window->cursor_mode = value;
+          break;
+        default:
+          err = GLFW_INVALID_VALUE;
+          break;
+        }
+      if (err != GLFW_INVALID_VALUE && window->sdl_window)
+        do_thing_with_cursor_mode (window);
+      break;
+    case GLFW_STICKY_KEYS:
+    case GLFW_STICKY_MOUSE_BUTTONS:
+      return; // TODO
+    case GLFW_LOCK_KEY_MODS:
+      bool_hint_helper (value, &window->lock_key_mods, &err);
+      break;
+    case GLFW_UNLIMITED_MOUSE_BUTTONS:
+    case GLFW_RAW_MOUSE_MOTION:
+      return; // TODO?
+    default:
+      err = GLFW_INVALID_ENUM;
+      ctx = "Unknown enum variant for glfwSetInputMode. File a bug.";
+    }
+
+  if (err == GLFW_INVALID_VALUE && ctx.empty())
+    ctx = "Invalid value for hint";
+
+  do_error_things (err, ctx);
+}
+
+void
+glfwSetWindowSizeLimits (GLFWwindow *window,
+                         int minwidth, int minheight,
+                         int maxwidth, int maxheight)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window)
+    return;
+
+  if ((minwidth != GLFW_DONT_CARE && minwidth < 0) ||
+      (minheight != GLFW_DONT_CARE && minheight < 0) ||
+      (maxwidth != GLFW_DONT_CARE && maxwidth < 0) ||
+      (maxheight != GLFW_DONT_CARE && maxheight < 0))
+    {
+      std::string err = std::format ("Passed invalid size to glfwSetWindowSizeLimits: "
+                                     "minwidth {}, minheight {}, maxwidth {}, maxheight {}",
+                                     minwidth, minheight, maxwidth, maxheight);
+      do_error_things (GLFW_INVALID_VALUE, err);
+      return;
+    }
+
+  if ((minwidth != GLFW_DONT_CARE &&
+       maxwidth != GLFW_DONT_CARE &&
+       maxwidth < minwidth) ||
+      (minheight != GLFW_DONT_CARE &&
+       maxheight != GLFW_DONT_CARE &&
+       maxheight < minheight))
+    {
+      if (maxwidth < minwidth)
+        do_error_things (GLFW_INVALID_VALUE, "glfwSetWindowSizeLimits: maxwidth was smaller than minwidth");
+      if (maxheight < minheight)
+        do_error_things (GLFW_INVALID_VALUE, "glfwSetWindowSizeLimits: maxheight was smaller than maxheight");
+      return;
+    }
+
+  // no-op
+  SDL_WindowFlags flags = SDL_GetWindowFlags(window->sdl_window);
+  if (!(flags & SDL_WINDOW_RESIZABLE))
+    return;
+
+  // map GLFW_DONT_CARE (-1) to SDL3's 0 (unlimited)
+  int sdl_min_w = (minwidth == GLFW_DONT_CARE) ? 0 : minwidth;
+  int sdl_min_h = (minheight == GLFW_DONT_CARE) ? 0 : minheight;
+  int sdl_max_w = (maxwidth == GLFW_DONT_CARE) ? 0 : maxwidth;
+  int sdl_max_h = (maxheight == GLFW_DONT_CARE) ? 0 : maxheight;
+
+  if (!SDL_SetWindowMinimumSize (window->sdl_window, sdl_min_w, sdl_min_h))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+  if (!SDL_SetWindowMaximumSize (window->sdl_window, sdl_max_w, sdl_max_h))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
 }

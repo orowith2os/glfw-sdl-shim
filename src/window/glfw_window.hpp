@@ -28,6 +28,7 @@ struct WindowHints
   bool doublebuffer = true;
 
   bool focus_on_show = true;
+  bool fullscreen_center_cursor_on_first_focus = true;
 
   std::string wayland_app_id;
 };
@@ -37,6 +38,7 @@ struct GLFWwindow {
   // you can't do multiple.
   SDL_Window *sdl_window = nullptr;
   SDL_GLContext gl_context = nullptr;
+
   int client_api = GLFW_OPENGL_API;
   SDL_WindowFlags flags = 0;
   bool should_close = false;
@@ -46,6 +48,8 @@ struct GLFWwindow {
   bool focus_on_show = false;
   GLFWscrollfun scroll_callback = nullptr;
   void *user_pointer = nullptr;
+  bool fullscreen_center_cursor_on_first_focus = false;
+  int cursor_mode = GLFW_CURSOR_NORMAL;
 
   ~GLFWwindow ()
     {
