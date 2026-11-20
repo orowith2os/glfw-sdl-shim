@@ -1,8 +1,8 @@
 #pragma once
 
-#include "helpers/glfw_helpers.hpp"
 #include "cursor/glfw_cursor.hpp"
 #include <SDL3/SDL_video.h>
+#include <string>
 
 struct WindowHints
 {
@@ -39,17 +39,33 @@ struct GLFWwindow {
   SDL_Window *sdl_window = nullptr;
   SDL_GLContext gl_context = nullptr;
 
+  // Creation flags
   int client_api = GLFW_OPENGL_API;
   SDL_WindowFlags flags = 0;
+  bool fullscreen_center_cursor_on_first_focus = false;
+
+  bool focus_on_show = false;
   bool should_close = false;
-  GLFWkeyfun key_callback = nullptr;
+  bool minimized = false;
+  bool maximized = false;
   bool lock_key_mods = false;
   GLFWcursor *cursor = nullptr;
-  bool focus_on_show = false;
-  GLFWscrollfun scroll_callback = nullptr;
   void *user_pointer = nullptr;
-  bool fullscreen_center_cursor_on_first_focus = false;
   int cursor_mode = GLFW_CURSOR_NORMAL;
+
+  // Callback hell.
+  GLFWscrollfun scroll_callback = nullptr;
+  GLFWkeyfun key_callback = nullptr;
+  GLFWwindowsizefun window_size_callback = nullptr;
+  GLFWwindowcontentscalefun content_scale_callback = nullptr;
+  GLFWwindowrefreshfun window_refresh_callback = nullptr;
+  GLFWwindowposfun window_pos_callback = nullptr;
+  GLFWwindowclosefun close_callback = nullptr;
+  GLFWwindowmaximizefun maximized_callback = nullptr;
+  GLFWwindowiconifyfun iconify_callback = nullptr;
+  GLFWwindowfocusfun focus_callback = nullptr;
+  GLFWmousebuttonfun mouse_button_callback = nullptr;
+  GLFWframebuffersizefun framebuffer_size_callback = nullptr;
 
   ~GLFWwindow ()
     {

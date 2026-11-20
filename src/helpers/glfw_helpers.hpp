@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glfw3.h"
+#include "window/glfw_window.hpp"
 
 #include <SDL3/SDL_init.h>
 
@@ -8,7 +9,6 @@
 #include <string_view>
 #include <string>
 #include "sdl_scancode.hpp"
-#include "window/glfw_window.hpp"
 
 SDL_Surface *
 sdl_surface_from_glfw_image (const GLFWimage *image);

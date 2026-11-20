@@ -279,6 +279,7 @@ glfwGetInputMode (GLFWwindow *window, int mode)
     }
 
   do_error_things (err, ctx);
+  return err;
 }
 
 void

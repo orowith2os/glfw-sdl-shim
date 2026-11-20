@@ -1,0 +1,30 @@
+#include <utility>
+
+#include "glfw_window.hpp"
+#include "helpers/glfw_helpers.hpp"
+
+#include "glfw3.h"
+
+#define SET_CB(func, member)                                         \
+  decltype (GLFWwindow::member) func (GLFWwindow *window,              \
+                                     decltype(GLFWwindow::member) cb) \
+  {                                                                  \
+    ASSERT_GLFW_INIT_PTR ()                                           \
+    ASSERT_MAIN_THREAD_PTR ()                                         \
+    return window ? std::exchange (window->member, cb) : nullptr;     \
+  }
+
+SET_CB (glfwSetFramebufferSizeCallback,    framebuffer_size_callback)
+SET_CB (glfwSetMouseButtonCallback,        mouse_button_callback)
+SET_CB (glfwSetWindowFocusCallback,        focus_callback)
+SET_CB (glfwSetWindowIconifyCallback,      iconify_callback)
+SET_CB (glfwSetWindowMaximizeCallback,     maximized_callback)
+SET_CB (glfwSetWindowCloseCallback,        close_callback)
+SET_CB (glfwSetWindowPosCallback,          window_pos_callback)
+SET_CB (glfwSetWindowRefreshCallback,      window_refresh_callback)
+SET_CB (glfwSetWindowContentScaleCallback, content_scale_callback)
+SET_CB (glfwSetWindowSizeCallback,         window_size_callback)
+SET_CB (glfwSetScrollCallback,             scroll_callback)
+SET_CB (glfwSetKeyCallback,                key_callback)
+
+#undef SET_CB

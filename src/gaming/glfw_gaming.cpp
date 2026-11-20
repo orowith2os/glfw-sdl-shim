@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include "glfw3.h"
 #include "helpers/glfw_helpers.hpp"
 

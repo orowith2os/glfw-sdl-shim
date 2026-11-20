@@ -31,6 +31,7 @@ glfw_sdl_shim_sources = [
   'helpers/glfw_helpers.cpp',
   'cursor/glfw_cursor.cpp',
   'gaming/glfw_gaming.cpp',
+  'window/glfw_callbacks.cpp',
   'main.cpp',
 ]
 

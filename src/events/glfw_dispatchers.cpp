@@ -12,10 +12,84 @@ glfw_window_dispatch_event (SDL_WindowEvent event)
   SDL_WindowFlags flags = SDL_GetWindowFlags (window->sdl_window);
 
   if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-    window->should_close = true;
+    {
+      window->should_close = true;
+      if (window->close_callback)
+        window->close_callback (window);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_RESIZED)
+    {
+      // data1 == width, data2 == height
+      if (window->window_size_callback)
+        window->window_size_callback (window, event.data1, event.data2);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
+    {
+      // data1 == x, data2 == y
+      if (window->framebuffer_size_callback)
+        window->framebuffer_size_callback (window, event.data1, event.data2);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_EXPOSED)
+    {
+      if (window->window_refresh_callback)
+        window->window_refresh_callback (window);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED)
+    {
+      if (window->content_scale_callback)
+        {
+          float scale = SDL_GetWindowDisplayScale (window->sdl_window);
+          if (scale == 0.0f)
+            scale = 1.0f;
+
+          window->content_scale_callback (window, scale, scale);
+        }
+    }
+  else if (event.type == SDL_EVENT_WINDOW_MOVED)
+    {
+      // data1 == x, data2 == y
+      if (window->window_pos_callback)
+        window->window_pos_callback (window, event.data1, event.data2);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_MAXIMIZED)
+    {
+      window->maximized = true;
+      window->minimized = false;
+      if (window->maximized_callback)
+        window->maximized_callback (window, GLFW_TRUE);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_MINIMIZED)
+    {
+      window->minimized = true;
+      window->maximized = false;
+      if (window->iconify_callback)
+        window->iconify_callback (window, GLFW_TRUE);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_RESTORED)
+    {
+      if (window->maximized)
+        {
+          window->maximized = false;
+          if (window->maximized_callback)
+            window->maximized_callback (window, GLFW_FALSE);
+        }
+      else if (window->minimized)
+        {
+          window->minimized = false;
+          if (window->iconify_callback)
+            window->iconify_callback (window, GLFW_FALSE);
+        }
+    }
+  else if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST)
+    {
+      if (window->focus_callback)
+        window->focus_callback (window, GLFW_FALSE);
+    }
   else if (event.type == SDL_EVENT_WINDOW_FOCUS_GAINED)
     {
       state.focused_window = window;
+      if (window->focus_callback)
+        window->focus_callback (window, GLFW_TRUE);
 
       do_thing_with_cursor_mode (window);
 
@@ -48,5 +122,5 @@ glfw_key_dispatch_event (SDL_KeyboardEvent event)
     window->key_callback (window,
                           translate_sdl_scancode_to_glfw (event.scancode),
                           event.raw, action,
-                          translate_sdl_keymod_to_glfw(window, event.mod));
+                          translate_sdl_keymod_to_glfw (window, event.mod));
 }

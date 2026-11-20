@@ -261,32 +261,6 @@ glfwShowWindow (GLFWwindow *window)
   SDL_SetHint (SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, "1");
 }
 
-GLFWscrollfun
-glfwSetScrollCallback (GLFWwindow *window, GLFWscrollfun callback)
-{
-  ASSERT_GLFW_INIT_PTR ()
-  ASSERT_MAIN_THREAD_PTR ()
-  if (!window)
-    return nullptr;
-
-  GLFWscrollfun previous = window->scroll_callback;
-  window->scroll_callback = callback;
-  return previous;
-}
-
-GLFWkeyfun
-glfwSetKeyCallback (GLFWwindow *window, GLFWkeyfun callback)
-{
-  ASSERT_GLFW_INIT_PTR ()
-  ASSERT_MAIN_THREAD_PTR ()
-
-  GLFWkeyfun old_callback = window->key_callback;
-
-  window->key_callback = callback;
-
-  return old_callback;
-}
-
 void
 glfwGetFramebufferSize (GLFWwindow *window,
                         int *width, int *height)
