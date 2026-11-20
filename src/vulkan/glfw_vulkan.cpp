@@ -167,6 +167,7 @@ glfwCreateWindowSurface (VkInstance instance,
           title = glfwGetWindowTitle (window);
           glfwGetWindowSize (window, &w, &h);
           SDL_DestroyWindow (window->sdl_window);
+          window->flags &= ~SDL_WINDOW_METAL;
           window->flags |= SDL_WINDOW_VULKAN;
           window->sdl_window = SDL_CreateWindow (title.c_str (), w, h, window->flags);
         }

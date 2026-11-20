@@ -6,6 +6,7 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_clipboard.h>
+#include <SDL3/SDL_platform.h>
 #include <span>
 
 extern "C" {
@@ -418,6 +419,7 @@ glfwCreateWindow (int width, int height,
   if (monitor)
     flags |= SDL_WINDOW_FULLSCREEN;
 
+  const char *platform = SDL_GetPlatform ();
   switch (hints.client_api)
     {
     case GLFW_OPENGL_API:
@@ -425,6 +427,11 @@ glfwCreateWindow (int width, int height,
       flags |= SDL_WINDOW_OPENGL;
       break;
     case GLFW_NO_API:
+      // Default to a Metal window, just in case. If it's Vulkan, the
+      // CreateSurface GLFW function will recreate the SDL surface
+      // with Vulkan flags.
+      if (SDL_strcmp (platform, "macOS") == 0)
+        flags |= SDL_WINDOW_METAL;
       break; // client handles this itself
     }
 
