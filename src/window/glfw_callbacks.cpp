@@ -16,6 +16,9 @@
 
 extern "C" {
 
+SET_CB (glfwSetCharCallback,               char_callback)
+SET_CB (glfwSetCharModsCallback,           char_mods_callback)
+SET_CB (glfwSetDropCallback,               drop_callback)
 SET_CB (glfwSetCursorEnterCallback,        cursor_enter_callback)
 SET_CB (glfwSetCursorPosCallback,          cursor_pos_callback)
 SET_CB (glfwSetFramebufferSizeCallback,    framebuffer_size_callback)

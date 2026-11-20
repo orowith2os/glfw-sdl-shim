@@ -68,6 +68,9 @@ struct GLFWwindow {
   GLFWframebuffersizefun framebuffer_size_callback = nullptr;
   GLFWcursorposfun cursor_pos_callback = nullptr;
   GLFWcursorenterfun cursor_enter_callback = nullptr;
+  GLFWdropfun drop_callback = nullptr;
+  GLFWcharmodsfun char_mods_callback = nullptr;
+  GLFWcharfun char_callback = nullptr;
 
   ~GLFWwindow ()
     {
