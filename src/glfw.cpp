@@ -45,14 +45,9 @@ glfwInit ()
   SDL_DisplayID primary_display = SDL_GetPrimaryDisplay ();
   if (primary_display)
     {
-      auto monitor = new (std::nothrow) GLFWmonitor ();
+      auto monitor = glfw_monitor_from_sdl_display_id (primary_display);
       if (monitor)
-        {
-          monitor->sdl_displayid = primary_display;
-          SDL_PropertiesID props = SDL_GetDisplayProperties (primary_display);
-          SDL_SetPointerProperty (props, "gay.oro.glfw_monitor_pointer", monitor);
-          state.monitors.push_back (monitor);
-        }
+        state.monitors.push_back (monitor);
     }
 
   for (SDL_DisplayID& display_id : display_span)
@@ -60,13 +55,9 @@ glfwInit ()
       if (!display_id || display_id == primary_display)
         continue; // We already added it, or it wasn't valid.
 
-      auto monitor = new (std::nothrow) GLFWmonitor ();
-      if (!monitor)
-        continue; // shouldn't happen, but move on
-      monitor->sdl_displayid = display_id;
-      SDL_PropertiesID props = SDL_GetDisplayProperties (display_id);
-      SDL_SetPointerProperty (props, "gay.oro.glfw_monitor_pointer", monitor);
-      state.monitors.push_back (monitor);
+      auto monitor = glfw_monitor_from_sdl_display_id (display_id);
+      if (monitor)
+        state.monitors.push_back (monitor);
     }
 
   state.base_time_ms = SDL_GetTicks ();

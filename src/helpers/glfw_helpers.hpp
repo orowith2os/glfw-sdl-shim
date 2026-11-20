@@ -64,8 +64,11 @@ GLFWwindow *
 glfw_window_from_sdl_window_id (SDL_WindowID id);
 
 void
-glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
-                                  GLFWmonitor **monitor);
+get_glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
+                                      GLFWmonitor **monitor);
+
+GLFWmonitor *
+glfw_monitor_from_sdl_display_id (SDL_DisplayID display_id);
 
 bool
 is_printable_glfw_key (int key);

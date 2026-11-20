@@ -4,6 +4,7 @@
 
 #include <SDL3/SDL_events.h>
 #include "window/glfw_window.hpp"
+#include "monitor/glfw_monitor.hpp"
 #include "glfw_dispatchers.hpp"
 
 static Uint32 shim_wakeup_event_type = 0;
@@ -26,6 +27,26 @@ dispatch_event (SDL_Event event)
     glfw_window_dispatch_event (window, event.window);
   else if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
     glfw_key_dispatch_event (window, event.key);
+  else if (event.type == SDL_EVENT_DISPLAY_ADDED)
+    {
+      SDL_DisplayID sdl_monitor = event.display.displayID;
+      auto monitor = glfw_monitor_from_sdl_display_id (sdl_monitor);
+      state.monitors.push_back (monitor);
+
+      if (monitor && state.monitor_callback)
+        state.monitor_callback (monitor, GLFW_CONNECTED);
+    }
+  else if (event.type == SDL_EVENT_DISPLAY_REMOVED)
+    {
+      SDL_DisplayID sdl_monitor = event.display.displayID;
+      GLFWmonitor *monitor = nullptr;
+      get_glfw_monitor_from_sdl_display_id(sdl_monitor, &monitor);
+
+      if (monitor && state.monitor_callback)
+        state.monitor_callback (monitor, GLFW_DISCONNECTED);
+
+      delete monitor;
+    }
   else if (event.type == SDL_EVENT_MOUSE_MOTION)
     {
       if (window && window->cursor_pos_callback)

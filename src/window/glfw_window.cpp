@@ -124,7 +124,7 @@ glfwGetWindowMonitor (GLFWwindow *window)
     }
 
   GLFWmonitor *monitor = nullptr;
-  glfw_monitor_from_sdl_display_id (display_id, &monitor);
+  get_glfw_monitor_from_sdl_display_id (display_id, &monitor);
   return monitor;
 }
 

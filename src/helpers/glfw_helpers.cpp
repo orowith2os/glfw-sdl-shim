@@ -1,5 +1,6 @@
 #include "glfw3.h"
 #include "glfw_helpers.hpp"
+#include "monitor/glfw_monitor.hpp"
 
 #include <format>
 
@@ -27,9 +28,24 @@ glfw_window_from_sdl_window (SDL_Window *sdl_window,
                                                       nullptr));
 }
 
+GLFWmonitor *
+glfw_monitor_from_sdl_display_id (SDL_DisplayID display_id)
+{
+  auto monitor = new (std::nothrow) GLFWmonitor ();
+  if (!monitor)
+    return nullptr; // shouldn't happen, but move on
+
+  monitor->sdl_displayid = display_id;
+  glfw_monitor_update_current_mode (monitor);
+  SDL_PropertiesID props = SDL_GetDisplayProperties (display_id);
+  SDL_SetPointerProperty (props, "gay.oro.glfw_monitor_pointer", monitor);
+
+  return monitor;
+}
+
 void
-glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
-                                  GLFWmonitor **monitor)
+get_glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
+                                      GLFWmonitor **monitor)
 {
   SDL_PropertiesID props = SDL_GetDisplayProperties (sdl_display);
   *monitor =

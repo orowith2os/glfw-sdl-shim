@@ -1,7 +1,112 @@
 #include "glfw_monitor.hpp"
 #include "helpers/glfw_helpers.hpp"
 
+static int
+countBits (uint32_t mask)
+{
+    int n = 0;
+    while (mask)
+      {
+        n += mask & 1;
+        mask >>= 1;
+      }
+    return n;
+}
+
+// copied from GLFW
+static void
+split_bpp (int bpp, int *red, int *green, int *blue)
+{
+    int delta;
+
+    // We assume that by 32 the user really meant 24
+    if (bpp == 32)
+        bpp = 24;
+
+    // Convert "bits per pixel" to red, green & blue sizes
+
+    *red = *green = *blue = bpp / 3;
+    delta = bpp - (*red * 3);
+    if (delta >= 1)
+        *green = *green + 1;
+
+    if (delta == 2)
+        *red = *red + 1;
+}
+
+GLFWvidmode
+sdl_display_mode_to_vidmode (const SDL_DisplayMode *m)
+{
+    GLFWvidmode out{};
+    out.width       = m->w;
+    out.height      = m->h;
+    out.refreshRate = (int) (m->refresh_rate + 0.5f); // float in SDL3
+
+    const SDL_PixelFormatDetails *d = SDL_GetPixelFormatDetails (m->format);
+    if (d && d->Rmask && d->Gmask && d->Bmask)
+      {
+        out.redBits   = countBits (d->Rmask);
+        out.greenBits = countBits (d->Gmask);
+        out.blueBits  = countBits (d->Bmask);
+      }
+    else
+      {
+        int bpp = d ? d->bits_per_pixel : 24;
+        split_bpp (bpp, &out.redBits, &out.greenBits, &out.blueBits);
+      }
+
+    return out;
+}
+
+bool
+glfw_monitor_update_current_mode (GLFWmonitor *monitor)
+{
+  const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode (monitor->sdl_displayid);
+  if (!mode)
+    return false;
+
+  monitor->current_mode = sdl_display_mode_to_vidmode (mode);
+  return true;
+}
+
 extern "C" {
+
+const GLFWvidmode *
+glfwGetVideoModes (GLFWmonitor *monitor, int *count)
+{
+  if (count)
+    *count = 0;
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
+  ASSERT_VALID_MON (monitor, nullptr)
+  if (!count)
+    return nullptr;
+
+  if (!glfw_monitor_update_current_mode (monitor))
+    {
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      return nullptr;
+    }
+
+  *count = 1;
+  return &monitor->current_mode;
+}
+
+const GLFWvidmode *
+glfwGetVideoMode (GLFWmonitor *monitor)
+{
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
+  ASSERT_VALID_MON (monitor, nullptr)
+
+  if (!glfw_monitor_update_current_mode (monitor))
+    {
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      return nullptr;
+    }
+
+  return &monitor->current_mode;
+}
 
 GLFWmonitor **
 glfwGetMonitors (int *count)
