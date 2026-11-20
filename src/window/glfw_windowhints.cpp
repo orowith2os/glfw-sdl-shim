@@ -71,7 +71,7 @@ bool_hint_helper (int value, bool *place, int *err)
 
 extern "C" {
 
-#define BOOL_RET(val)\
+#define BOOL(val)\
   val ? GLFW_TRUE : GLFW_FALSE;
 
 void
