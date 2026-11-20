@@ -107,6 +107,10 @@ assert_main_thread ();
   if (!assert_main_thread ())\
     return nullptr;
 
+#define ASSERT_MAIN_THREAD(val)\
+  if (!assert_main_thread ())\
+    return val;
+
 int
 assert_glfw_init ();
 
@@ -122,3 +126,7 @@ assert_glfw_init ();
 #define ASSERT_GLFW_INIT_PTR()\
   if (!assert_glfw_init ())\
     return nullptr;
+
+#define ASSERT_GLFW_INIT(val)\
+  if (!assert_glfw_init ())\
+    return val;

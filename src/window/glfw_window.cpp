@@ -12,6 +12,28 @@
 
 extern "C" {
 
+float
+glfwGetWindowOpacity (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT (1.0)
+  ASSERT_MAIN_THREAD (1.0)
+  if (!window || !window->sdl_window)
+    return 1.0;
+
+  return SDL_GetWindowOpacity (window->sdl_window);
+}
+
+void
+glfwSetWindowOpacity (GLFWwindow *window, float opacity)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window || !window->sdl_window)
+    return;
+
+  SDL_SetWindowOpacity (window->sdl_window, opacity);
+}
+
 void
 glfwGetWindowPos (GLFWwindow* window, int* xpos, int* ypos)
 {
