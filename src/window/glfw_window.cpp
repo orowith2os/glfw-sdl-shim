@@ -13,6 +13,35 @@
 extern "C" {
 
 void
+glfwGetWindowFrameSize (GLFWwindow *window,
+                        int *left, int *top, int *right, int *bottom)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+
+  SDL_GetWindowBordersSize (window->sdl_window, top, left, bottom, right);
+}
+
+void
+glfwGetWindowContentScale (GLFWwindow *window,
+                           float *xscale, float *yscale)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+  if (!xscale && !yscale)
+    return;
+
+  float scale = SDL_GetWindowDisplayScale (window->sdl_window);
+
+  if (xscale)
+    *xscale = scale;
+  if (yscale)
+    *yscale = scale;
+}
+
+void
 glfwRestoreWindow (GLFWwindow *window)
 {
   ASSERT_GLFW_INIT_VOID ()
