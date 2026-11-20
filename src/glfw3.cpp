@@ -1,11 +1,13 @@
 #include "glfw3.h"
 #include "config.h"
 #include "helpers/glfw_helpers.hpp"
+#include "helpers/native/scancodes_linux_flipped.h"
 
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3/SDL_timer.h>
+#include <SDL3/SDL_platform.h>
 
 #include <string>
 #include <format>
@@ -286,6 +288,18 @@ glfwGetVersionString ()
 {
   // This (can) have some debug info that may be useful to users and devs
   return SHIM_VERSION_STRING;
+}
+
+int
+glfwGetKeyScancode (int key)
+{
+  ASSERT_GLFW_INIT (-1)
+
+  const char *platform = SDL_GetPlatform ();
+  if (SDL_strcmp (platform, "Linux") == 0)
+    return sdl_scancode_to_linux (translate_glfw_key_to_sdl_scancode (key));
+  else
+    return -1;
 }
 
 } // extern "C"
