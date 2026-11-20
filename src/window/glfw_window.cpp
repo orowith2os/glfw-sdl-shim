@@ -8,8 +8,62 @@
 #include <SDL3/SDL_clipboard.h>
 #include <SDL3/SDL_platform.h>
 #include <span>
+#include <format>
 
 extern "C" {
+
+void
+glfwSetWindowSizeLimits (GLFWwindow *window,
+                         int minwidth, int minheight,
+                         int maxwidth, int maxheight)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  if (!window)
+    return;
+
+  if ((minwidth != GLFW_DONT_CARE && minwidth < 0) ||
+      (minheight != GLFW_DONT_CARE && minheight < 0) ||
+      (maxwidth != GLFW_DONT_CARE && maxwidth < 0) ||
+      (maxheight != GLFW_DONT_CARE && maxheight < 0))
+    {
+      std::string err = std::format ("Passed invalid size to glfwSetWindowSizeLimits: "
+                                     "minwidth {}, minheight {}, maxwidth {}, maxheight {}",
+                                     minwidth, minheight, maxwidth, maxheight);
+      do_error_things (GLFW_INVALID_VALUE, err);
+      return;
+    }
+
+  if ((minwidth != GLFW_DONT_CARE &&
+       maxwidth != GLFW_DONT_CARE &&
+       maxwidth < minwidth) ||
+      (minheight != GLFW_DONT_CARE &&
+       maxheight != GLFW_DONT_CARE &&
+       maxheight < minheight))
+    {
+      if (maxwidth < minwidth)
+        do_error_things (GLFW_INVALID_VALUE, "glfwSetWindowSizeLimits: maxwidth was smaller than minwidth");
+      if (maxheight < minheight)
+        do_error_things (GLFW_INVALID_VALUE, "glfwSetWindowSizeLimits: maxheight was smaller than maxheight");
+      return;
+    }
+
+  // no-op
+  SDL_WindowFlags flags = SDL_GetWindowFlags(window->sdl_window);
+  if (!(flags & SDL_WINDOW_RESIZABLE))
+    return;
+
+  // map GLFW_DONT_CARE (-1) to SDL3's 0 (unlimited)
+  int sdl_min_w = (minwidth == GLFW_DONT_CARE) ? 0 : minwidth;
+  int sdl_min_h = (minheight == GLFW_DONT_CARE) ? 0 : minheight;
+  int sdl_max_w = (maxwidth == GLFW_DONT_CARE) ? 0 : maxwidth;
+  int sdl_max_h = (maxheight == GLFW_DONT_CARE) ? 0 : maxheight;
+
+  if (!SDL_SetWindowMinimumSize (window->sdl_window, sdl_min_w, sdl_min_h))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+  if (!SDL_SetWindowMaximumSize (window->sdl_window, sdl_max_w, sdl_max_h))
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+}
 
 void
 glfwGetWindowPos (GLFWwindow* window, int* xpos, int* ypos)
