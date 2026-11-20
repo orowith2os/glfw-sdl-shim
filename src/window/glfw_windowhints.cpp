@@ -312,8 +312,11 @@ glfwSetInputMode (GLFWwindow *window, int mode, int value)
         do_thing_with_cursor_mode (window);
       break;
     case GLFW_STICKY_KEYS:
+      bool_hint_helper (value, &window->sticky_keys, &err);
+      break;
     case GLFW_STICKY_MOUSE_BUTTONS:
-      return; // TODO
+      bool_hint_helper (value, &window->sticky_mouse, &err);
+      break;
     case GLFW_LOCK_KEY_MODS:
       bool_hint_helper (value, &window->lock_key_mods, &err);
       break;

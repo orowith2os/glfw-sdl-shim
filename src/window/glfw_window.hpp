@@ -48,12 +48,16 @@ struct GLFWwindow {
   bool should_close = false;
   bool minimized = false;
   bool maximized = false;
+  int modifiers = 0;
   bool lock_key_mods = false;
   GLFWcursor *cursor = nullptr;
   void *user_pointer = nullptr;
   int cursor_mode = GLFW_CURSOR_NORMAL;
   char keys[GLFW_KEY_LAST + 1]; // GLFW_PRESS, GLFW_RELEASE, or GAY_ORO_GLFW_STICK (3)
-  bool sticky_keys;
+  bool sticky_keys = false;
+
+  char mouse_buttons[GLFW_MOUSE_BUTTON_LAST + 1]; // GLFW_PRESS, GLFW_RELEASE, or GAY_ORO_GLFW_STICK (3)
+  bool sticky_mouse = false;
 
   // Callback hell.
   GLFWscrollfun scroll_callback = nullptr;

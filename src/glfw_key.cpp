@@ -7,11 +7,35 @@
 #include <string>
 
 void
+glfw_mouse_button_dispatch_event (GLFWwindow *window, SDL_MouseButtonEvent event)
+{
+  ASSERT_VALID_WIN_VOID (window)
+
+  int pressed = event.down ? GLFW_PRESS : GLFW_RELEASE;
+  int button = (event.button < 6) ? sdl_to_glfw_btn[event.button] : -1;
+  if (button < 0)
+    goto callback;
+
+  if (pressed == GLFW_RELEASE && window->mouse_buttons[button] == GLFW_RELEASE)
+    return;
+
+  if (pressed == GLFW_RELEASE && window->sticky_mouse)
+    window->mouse_buttons[button] = GAY_ORO_GLFW_STICK;
+  else
+    window->mouse_buttons[button] = button;
+
+callback:
+  if (window->mouse_button_callback)
+    window->mouse_button_callback (window, button, pressed, window->modifiers);
+}
+
+void
 glfw_key_dispatch_event (GLFWwindow *window, SDL_KeyboardEvent event)
 {
   ASSERT_VALID_WIN_VOID (window)
 
   const int key = translate_sdl_scancode_to_glfw (event.scancode);
+  window->modifiers = translate_sdl_keymod_to_glfw (window, event.mod);
   int action = event.down
                  ? (event.repeat ? GLFW_REPEAT : GLFW_PRESS)
                  : GLFW_RELEASE;
@@ -31,10 +55,31 @@ glfw_key_dispatch_event (GLFWwindow *window, SDL_KeyboardEvent event)
     window->key_callback (window,
                           translate_sdl_scancode_to_glfw (event.scancode),
                           event.raw, action,
-                          translate_sdl_keymod_to_glfw (window, event.mod));
+                          window->modifiers);
 }
 
 extern "C" {
+
+int
+glfwGetMouseButton (GLFWwindow *window, int button)
+{
+  ASSERT_GLFW_INIT (GLFW_RELEASE)
+  ASSERT_VALID_WIN (window, GLFW_RELEASE)
+  if (button < GLFW_MOUSE_BUTTON_1 || button > GLFW_MOUSE_BUTTON_LAST)
+    {
+      std::string ctx = std::format ("Invalid mouse button {}", button);
+      do_error_things (GLFW_INVALID_ENUM, ctx);
+      return GLFW_RELEASE;
+    }
+
+  if (window->mouse_buttons[button] == GAY_ORO_GLFW_STICK)
+    {
+      window->mouse_buttons[button] = GLFW_RELEASE;
+      return GLFW_PRESS;
+    }
+
+  return window->mouse_buttons[button];
+}
 
 int
 glfwGetKey (GLFWwindow *window, int key)

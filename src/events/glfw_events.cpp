@@ -38,6 +38,17 @@ dispatch_event (SDL_Event event)
                                  static_cast<double> (event.wheel.x),
                                  static_cast<double> (event.wheel.y));
     }
+  else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP || event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+    {
+      if (!window)
+        return;
+      int pressed = event.button.down ? GLFW_PRESS : GLFW_RELEASE;
+      int button = (event.button.button < 6) ? sdl_to_glfw_btn[event.button.button] : -1;
+
+
+      if (window->mouse_button_callback)
+        window->mouse_button_callback (window, button, pressed, window->modifiers);
+    }
   // TODO: drop
   // TODO: monitor
 }

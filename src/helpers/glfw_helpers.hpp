@@ -100,6 +100,16 @@ translate_sdl_keymod_to_glfw (GLFWwindow *window, SDL_Keymod sdl_keymods) noexce
   return mods;
 }
 
+inline
+int sdl_to_glfw_btn[] = {
+    -1,                       // 0 unused
+    GLFW_MOUSE_BUTTON_LEFT,   // 1 SDL_BUTTON_LEFT
+    GLFW_MOUSE_BUTTON_MIDDLE, // 2 SDL_BUTTON_MIDDLE
+    GLFW_MOUSE_BUTTON_RIGHT,  // 3 SDL_BUTTON_RIGHT
+    GLFW_MOUSE_BUTTON_4,      // 4 SDL_BUTTON_X1
+    GLFW_MOUSE_BUTTON_5       // 5 SDL_BUTTON_X2
+};
+
 bool
 glfw_init_events ();
 
