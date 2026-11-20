@@ -4,6 +4,7 @@
 
 extern "C" {
 
+// This can be called from any thread.
 GLFWwindow *
 glfwGetCurrentContext ()
 {

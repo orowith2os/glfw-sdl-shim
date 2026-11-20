@@ -21,6 +21,10 @@ glfw_window_from_sdl_window (SDL_Window *sdl_window,
 GLFWwindow *
 glfw_window_from_sdl_window_id (SDL_WindowID id);
 
+void
+glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
+                                  GLFWmonitor **monitor);
+
 template <typename Func>
 [[maybe_unused]]
 static bool

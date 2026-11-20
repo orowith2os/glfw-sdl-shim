@@ -12,6 +12,29 @@
 
 extern "C" {
 
+GLFWmonitor *
+glfwGetWindowMonitor (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
+  ASSERT_VALID_WIN (window, nullptr)
+
+  SDL_WindowFlags flags = SDL_GetWindowFlags (window->sdl_window);
+  if (!(flags & SDL_WINDOW_FULLSCREEN))
+    return nullptr;
+
+  SDL_DisplayID display_id = SDL_GetDisplayForWindow (window->sdl_window);
+  if (display_id == 0)
+    {
+      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+      return nullptr;
+    }
+
+  GLFWmonitor *monitor = nullptr;
+  glfw_monitor_from_sdl_display_id (display_id, &monitor);
+  return monitor;
+}
+
 void
 glfwGetWindowFrameSize (GLFWwindow *window,
                         int *left, int *top, int *right, int *bottom)
@@ -118,7 +141,7 @@ glfwGetWindowPos (GLFWwindow* window, int* xpos, int* ypos)
     }
 
   *xpos = x;
-  *ypos = x;
+  *ypos = y;
 }
 
 void

@@ -8,8 +8,7 @@
 void
 do_thing_with_cursor_mode (GLFWwindow *window)
 {
-  if (!window || !window->sdl_window)
-    return;
+  ASSERT_VALID_WIN_VOID (window)
 
   switch (window->cursor_mode)
     {
@@ -54,15 +53,9 @@ glfwGetCursorPos (GLFWwindow* window, double* xpos, double* ypos)
     *ypos = 0;
   if (!xpos && !ypos)
     return;
-
   ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
-
-  if (!window)
-    {
-      do_error_things (GLFW_INVALID_VALUE, "Didn't pass a window to glfwGetCursorPos.");
-      return;
-    }
+  ASSERT_VALID_WIN_VOID (window)
 
   float x = 0.0f, y = 0.0f;
 
@@ -97,8 +90,7 @@ glfwSetCursorPos (GLFWwindow *window, double xpos, double ypos)
 {
   ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
-  if (!window)
-    return;
+  ASSERT_VALID_WIN_VOID (window)
 
   SDL_WarpMouseInWindow (window->sdl_window, xpos, ypos);
 }
@@ -106,8 +98,8 @@ glfwSetCursorPos (GLFWwindow *window, double xpos, double ypos)
 GLFWcursor *
 glfwCreateCursor (const GLFWimage *image, int xhot, int yhot)
 {
-  ASSERT_MAIN_THREAD (nullptr)
   ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
 
   auto surface = sdl_surface_from_glfw_image (image);
   if (!surface)
@@ -137,8 +129,8 @@ glfwCreateCursor (const GLFWimage *image, int xhot, int yhot)
 GLFWcursor *
 glfwCreateStandardCursor (int shape)
 {
-  ASSERT_MAIN_THREAD (nullptr)
   ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
 
   auto cursor = new (std::nothrow) GLFWcursor ();
   if (!cursor)
@@ -159,9 +151,8 @@ glfwCreateStandardCursor (int shape)
 void
 glfwDestroyCursor (GLFWcursor *cursor)
 {
-  ASSERT_MAIN_THREAD_VOID ()
   ASSERT_GLFW_INIT_VOID ()
-
+  ASSERT_MAIN_THREAD_VOID ()
   if (!cursor)
     return;
 
@@ -178,10 +169,10 @@ glfwDestroyCursor (GLFWcursor *cursor)
 void
 glfwSetCursor (GLFWwindow *window, GLFWcursor *cursor)
 {
-  ASSERT_MAIN_THREAD_VOID ()
   ASSERT_GLFW_INIT_VOID ()
-
-  if (!window || window->cursor == cursor)
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+  if (window->cursor == cursor)
     return;
 
   if (window->cursor)

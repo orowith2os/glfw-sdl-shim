@@ -164,4 +164,4 @@ glfwGetMonitorUserPointer (GLFWmonitor *monitor)
   return ptr;
 }
 
-}
+} // extern "C"
