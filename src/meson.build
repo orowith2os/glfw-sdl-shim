@@ -34,7 +34,6 @@ glfw_sdl_shim_sources = [
   'gaming/glfw_gaming.cpp',
   'window/glfw_callbacks.cpp',
   'monitor/glfw_monitor.cpp',
-  'main.cpp',
 ]
 
 glfw_sdl_shim_deps = [
@@ -48,10 +47,3 @@ shared_library('glfw-sdl-shim', glfw_sdl_shim_sources,
   include_directories : include_dir,
   install: true,
 )
-
-executable('glfw-sdl-shim', glfw_sdl_shim_sources,
-  dependencies: glfw_sdl_shim_deps,
-  include_directories : include_dir,
-  install: true,
-)
-
