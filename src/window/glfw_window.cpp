@@ -12,13 +12,42 @@
 
 extern "C" {
 
+void
+glfwRestoreWindow (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+
+  SDL_RestoreWindow (window->sdl_window);
+}
+
+void
+glfwMaximizeWindow (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+
+  SDL_MaximizeWindow (window->sdl_window);
+}
+
+void
+glfwIconifyWindow (GLFWwindow *window)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+
+  SDL_MinimizeWindow (window->sdl_window);
+}
+
 float
 glfwGetWindowOpacity (GLFWwindow *window)
 {
   ASSERT_GLFW_INIT (1.0)
   ASSERT_MAIN_THREAD (1.0)
-  if (!window || !window->sdl_window)
-    return 1.0;
+  ASSERT_VALID_WIN (window, 1.0)
 
   return SDL_GetWindowOpacity (window->sdl_window);
 }
@@ -28,8 +57,7 @@ glfwSetWindowOpacity (GLFWwindow *window, float opacity)
 {
   ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
-  if (!window || !window->sdl_window)
-    return;
+  ASSERT_VALID_WIN_VOID (window)
 
   SDL_SetWindowOpacity (window->sdl_window, opacity);
 }

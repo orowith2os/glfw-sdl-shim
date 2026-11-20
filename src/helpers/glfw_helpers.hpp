@@ -130,3 +130,11 @@ assert_glfw_init ();
 #define ASSERT_GLFW_INIT(val)\
   if (!assert_glfw_init ())\
     return val;
+
+#define ASSERT_VALID_WIN(win, val)\
+  if (!win && !win->sdl_window)\
+    return val;
+
+#define ASSERT_VALID_WIN_VOID(win)\
+  if (!win && !win->sdl_window)\
+    return;
