@@ -1,6 +1,7 @@
 #include "helpers/glfw_helpers.hpp"
 #include "window/glfw_window.hpp"
 #include "glfw_dispatchers.hpp"
+#include "config.h"
 
 void
 glfw_window_dispatch_event (GLFWwindow *window, SDL_WindowEvent event)
@@ -113,21 +114,5 @@ glfw_window_dispatch_event (GLFWwindow *window, SDL_WindowEvent event)
           window->fullscreen_center_cursor_on_first_focus = false;
         }
     }
-}
-
-void
-glfw_key_dispatch_event (GLFWwindow *window, SDL_KeyboardEvent event)
-{
-  ASSERT_VALID_WIN_VOID (window)
-
-  int action = event.down
-                 ? (event.repeat ? GLFW_REPEAT : GLFW_PRESS)
-                 : GLFW_RELEASE;
-
-  if (window->key_callback)
-    window->key_callback (window,
-                          translate_sdl_scancode_to_glfw (event.scancode),
-                          event.raw, action,
-                          translate_sdl_keymod_to_glfw (window, event.mod));
 }
 

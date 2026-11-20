@@ -52,6 +52,8 @@ struct GLFWwindow {
   GLFWcursor *cursor = nullptr;
   void *user_pointer = nullptr;
   int cursor_mode = GLFW_CURSOR_NORMAL;
+  char keys[GLFW_KEY_LAST + 1]; // GLFW_PRESS, GLFW_RELEASE, or GAY_ORO_GLFW_STICK (3)
+  bool sticky_keys;
 
   // Callback hell.
   GLFWscrollfun scroll_callback = nullptr;
