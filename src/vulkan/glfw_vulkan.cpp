@@ -33,7 +33,7 @@ extern "C" {
 const char **
 glfwGetRequiredInstanceExtensions (uint32_t* count)
 {
-  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
   ENSURE_VULKAN_INIT ()
   ASSERT_VULKAN_LOADED_PTR ()
 
@@ -84,7 +84,7 @@ int
 glfwVulkanSupported ()
 {
   ENSURE_VULKAN_INIT ()
-  ASSERT_GLFW_INIT_INT ()
+  ASSERT_GLFW_INIT (GLFW_FALSE)
   ASSERT_VULKAN_LOADED_INT ()
 
   return GLFW_TRUE;
@@ -96,7 +96,7 @@ glfwGetInstanceProcAddress (VkInstance  instance,
                             const char *procname)
 {
   ENSURE_VULKAN_INIT()
-  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
   ASSERT_VULKAN_LOADED_PTR()
 
   GLFWvkproc result = nullptr;
@@ -121,7 +121,7 @@ glfwGetPhysicalDevicePresentationSupport (VkInstance instance,
                                           uint32_t queuefamily)
 {
   ENSURE_VULKAN_INIT ()
-  ASSERT_GLFW_INIT_INT ()
+  ASSERT_GLFW_INIT (GLFW_FALSE)
   ASSERT_VULKAN_LOADED_INT ()
   int result;
 

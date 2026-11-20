@@ -201,7 +201,7 @@ glfwSetWindowUserPointer (GLFWwindow *window, void *pointer)
 void *
 glfwGetWindowUserPointer (GLFWwindow *window)
 {
-  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
   void *ptr = nullptr;
 
   run_on_main_sync ([&]()
@@ -236,8 +236,8 @@ glfwSetClipboardString (GLFWwindow *, const char* string)
 const char *
 glfwGetClipboardString (GLFWwindow *)
 {
-  ASSERT_GLFW_INIT_PTR ()
-  ASSERT_MAIN_THREAD_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
 
   auto text = SDL_GetClipboardText ();
   if (!text || text[0] == '\0')
@@ -299,8 +299,8 @@ glfwSetWindowIcon (GLFWwindow *window, int count, const GLFWimage *images)
 const char *
 glfwGetWindowTitle (GLFWwindow *window)
 {
-  ASSERT_GLFW_INIT_PTR ()
-  ASSERT_MAIN_THREAD_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
   if (!window || !window->sdl_window)
     return nullptr;
 
@@ -385,7 +385,7 @@ glfwDestroyWindow (GLFWwindow *window)
 int
 glfwWindowShouldClose (GLFWwindow *window)
 {
-  ASSERT_GLFW_INIT_INT ()
+  ASSERT_GLFW_INIT (GLFW_FALSE)
 
   int val;
   if (!window)
@@ -424,8 +424,8 @@ glfwCreateWindow (int width, int height,
                   GLFWmonitor *monitor,
                   GLFWwindow *share)
 {
-  ASSERT_GLFW_INIT_PTR ()
-  ASSERT_MAIN_THREAD_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
 
   int context_flags = 0;
   GLFWwindow *window = new (std::nothrow) GLFWwindow ();

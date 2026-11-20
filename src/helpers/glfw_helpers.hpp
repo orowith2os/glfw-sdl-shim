@@ -4,6 +4,7 @@
 #include "window/glfw_window.hpp"
 
 #include <SDL3/SDL_init.h>
+#include <SDL3/SDL_video.h>
 
 #include <optional>
 #include <string_view>
@@ -45,7 +46,8 @@ struct ShimGlobalState {
   uint64_t timer_start_ms = 0;
   uint64_t base_time_ms = 0;
   GLFWjoystickfun joystick_callback = nullptr;
-  GLFWwindow *focused_window;
+  GLFWwindow *focused_window = nullptr;
+  std::vector <GLFWmonitor *> monitors;
 };
 
 // https://www.glfw.org/docs/3.3/intro_guide.html#error_handling
@@ -94,47 +96,45 @@ glfw_init_events ();
 int
 assert_main_thread ();
 
-#define ASSERT_MAIN_THREAD_INT()\
-  if (!assert_main_thread ())\
-    return GLFW_FALSE;
+int
+assert_glfw_init ();
 
-// returns int, so don't use otherwise
-#define ASSERT_MAIN_THREAD_VOID()\
-  if (!assert_main_thread ())\
-    return;
-
-#define ASSERT_MAIN_THREAD_PTR()\
-  if (!assert_main_thread ())\
-    return nullptr;
+// main thread
 
 #define ASSERT_MAIN_THREAD(val)\
   if (!assert_main_thread ())\
     return val;
 
-int
-assert_glfw_init ();
-
-#define ASSERT_GLFW_INIT_INT()\
-  if (!assert_glfw_init ())\
-    return GLFW_FALSE;
-
-// returns int, so don't use otherwise
-#define ASSERT_GLFW_INIT_VOID()\
-  if (!assert_glfw_init ())\
+#define ASSERT_MAIN_THREAD_VOID()\
+  if (!assert_main_thread ())\
     return;
 
-#define ASSERT_GLFW_INIT_PTR()\
-  if (!assert_glfw_init ())\
-    return nullptr;
+// glfw init
 
 #define ASSERT_GLFW_INIT(val)\
   if (!assert_glfw_init ())\
     return val;
 
+#define ASSERT_GLFW_INIT_VOID()\
+  if (!assert_glfw_init ())\
+    return;
+
+// window stuffs
+
 #define ASSERT_VALID_WIN(win, val)\
-  if (!win && !win->sdl_window)\
+  if (!win || !win->sdl_window)\
     return val;
 
 #define ASSERT_VALID_WIN_VOID(win)\
-  if (!win && !win->sdl_window)\
+  if (!win || !win->sdl_window)\
+    return;
+
+// funny monitor things
+
+#define ASSERT_VALID_MON(mon, val)\
+  if (!mon || !mon->sdl_displayid)\
+    return val;
+
+#define ASSERT_VALID_MON_VOID(mon)\
+  if (!mon || !mon->sdl_displayid)\
     return;

@@ -255,8 +255,8 @@ glfwWindowHintString (int hint, const char* value)
 int
 glfwGetInputMode (GLFWwindow *window, int mode)
 {
-  ASSERT_GLFW_INIT_INT ()
-  ASSERT_MAIN_THREAD_INT ()
+  ASSERT_GLFW_INIT (GLFW_FALSE)
+  ASSERT_MAIN_THREAD (GLFW_FALSE)
   if (!window)
     return GLFW_FALSE;
 

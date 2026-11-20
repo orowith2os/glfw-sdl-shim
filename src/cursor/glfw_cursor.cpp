@@ -106,8 +106,8 @@ glfwSetCursorPos (GLFWwindow *window, double xpos, double ypos)
 GLFWcursor *
 glfwCreateCursor (const GLFWimage *image, int xhot, int yhot)
 {
-  ASSERT_MAIN_THREAD_PTR ()
-  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_MAIN_THREAD (nullptr)
+  ASSERT_GLFW_INIT (nullptr)
 
   auto surface = sdl_surface_from_glfw_image (image);
   if (!surface)
@@ -137,8 +137,8 @@ glfwCreateCursor (const GLFWimage *image, int xhot, int yhot)
 GLFWcursor *
 glfwCreateStandardCursor (int shape)
 {
-  ASSERT_MAIN_THREAD_PTR ()
-  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_MAIN_THREAD (nullptr)
+  ASSERT_GLFW_INIT (nullptr)
 
   auto cursor = new (std::nothrow) GLFWcursor ();
   if (!cursor)

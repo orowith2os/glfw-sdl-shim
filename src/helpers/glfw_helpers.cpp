@@ -27,6 +27,17 @@ glfw_window_from_sdl_window (SDL_Window *sdl_window,
                                                       nullptr));
 }
 
+void
+glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
+                                  GLFWmonitor **monitor)
+{
+  SDL_PropertiesID props = SDL_GetDisplayProperties (sdl_display);
+  *monitor =
+    static_cast<GLFWmonitor*> (SDL_GetPointerProperty (props,
+                                                       "gay.oro.glfw_monitor_pointer",
+                                                       nullptr));
+}
+
 GLFWwindow *
 glfw_window_from_sdl_window_id (SDL_WindowID id)
 {
@@ -128,7 +139,7 @@ assert_glfw_init ()
     return GLFW_TRUE;
   else
     {
-      do_error_things(GLFW_NOT_INITIALIZED, "GLFW was not initialized.");
+      do_error_things (GLFW_NOT_INITIALIZED, "GLFW was not initialized.");
       return GLFW_FALSE;
     }
 }

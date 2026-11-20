@@ -64,8 +64,8 @@ glfwJoystickIsGamepad (int jid)
 GLFWjoystickfun
 glfwSetJoystickCallback (GLFWjoystickfun callback)
 {
-  ASSERT_GLFW_INIT_PTR ()
-  ASSERT_MAIN_THREAD_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
 
   GLFWjoystickfun previous = state.joystick_callback;
   state.joystick_callback = callback;

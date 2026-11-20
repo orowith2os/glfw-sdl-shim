@@ -7,7 +7,7 @@ extern "C" {
 GLFWwindow *
 glfwGetCurrentContext ()
 {
-  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
   GLFWwindow *window = nullptr;
 
   run_on_main_sync([&]()
@@ -26,7 +26,7 @@ glfwGetCurrentContext ()
 GLFWglproc
 glfwGetProcAddress (const char *procname)
 {
-  ASSERT_GLFW_INIT_PTR ()
+  ASSERT_GLFW_INIT (nullptr)
   if (!procname)
     return nullptr;
 
@@ -48,7 +48,7 @@ int
 glfwExtensionSupported (const char *extension)
 {
   int val;
-  ASSERT_GLFW_INIT_INT ()
+  ASSERT_GLFW_INIT (GLFW_FALSE)
 
   if (!extension || *extension == '\0')
     return GLFW_FALSE;

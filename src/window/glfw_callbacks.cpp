@@ -9,10 +9,12 @@
   decltype (GLFWwindow::member) func (GLFWwindow *window,              \
                                      decltype(GLFWwindow::member) cb) \
   {                                                                  \
-    ASSERT_GLFW_INIT_PTR ()                                           \
-    ASSERT_MAIN_THREAD_PTR ()                                         \
+    ASSERT_GLFW_INIT (nullptr)                                           \
+    ASSERT_MAIN_THREAD (nullptr)                                         \
     return window ? std::exchange (window->member, cb) : nullptr;     \
   }
+
+extern "C" {
 
 SET_CB (glfwSetCursorEnterCallback,        cursor_enter_callback)
 SET_CB (glfwSetCursorPosCallback,          cursor_pos_callback)
@@ -29,4 +31,7 @@ SET_CB (glfwSetWindowSizeCallback,         window_size_callback)
 SET_CB (glfwSetScrollCallback,             scroll_callback)
 SET_CB (glfwSetKeyCallback,                key_callback)
 
+}
+
 #undef SET_CB
+
