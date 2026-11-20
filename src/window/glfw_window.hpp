@@ -29,6 +29,11 @@ struct WindowHints
 
   bool focus_on_show = true;
   bool fullscreen_center_cursor_on_first_focus = true;
+  bool resizable = true;
+  bool decorated = true;
+  bool minimize_on_focus_lost = false;
+  bool floating = false;
+  bool transparent = false;
 
   std::string wayland_app_id;
 };
@@ -41,6 +46,15 @@ struct GLFWwindow {
 
   // Creation flags
   int client_api = GLFW_OPENGL_API;
+  int gl_profile = GLFW_OPENGL_ANY_PROFILE;
+  int gl_version_major = 1;
+  int gl_version_minor = 0;
+  int gl_version_rev = 0;
+  bool gl_forward_compat = false;
+  bool gl_debug_context = false;
+  bool gl_context_no_error = false;
+  int gl_context_release_behavior = GLFW_ANY_RELEASE_BEHAVIOR;
+  int gl_context_robustness = GLFW_NO_ROBUSTNESS;
   SDL_WindowFlags flags = 0;
   bool fullscreen_center_cursor_on_first_focus = false;
 
@@ -48,6 +62,13 @@ struct GLFWwindow {
   bool should_close = false;
   bool minimized = false;
   bool maximized = false;
+  bool hovered = false;
+  bool hidden = false;
+  bool resizable = true;
+  bool decorated = true;
+  bool minimize_on_focus_lost = false;
+  bool floating = false;
+  bool transparent = false;
   int modifiers = 0;
   bool lock_key_mods = false;
   GLFWcursor *cursor = nullptr;

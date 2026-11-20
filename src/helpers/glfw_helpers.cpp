@@ -3,6 +3,21 @@
 #include "monitor/glfw_monitor.hpp"
 
 #include <format>
+#include <GL/gl.h>
+
+GLVersion
+get_gl_context_version ()
+{
+  GLVersion version{};
+  const char *version_str = (const char *)glGetString(GL_VERSION);
+  if (!version_str)
+    return version;
+
+  if (sscanf (version_str, "%d.%d.%d", &version.major, &version.minor, &version.rev) < 3)
+    version.rev = 0;
+
+  return version;
+}
 
 SDL_Surface *
 sdl_surface_from_glfw_image (const GLFWimage *image)

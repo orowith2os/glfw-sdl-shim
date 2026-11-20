@@ -8,14 +8,6 @@
 #include <string>
 #include <format>
 
-void
-glfwDefaultWindowHints ()
-{
-  ASSERT_MAIN_THREAD_VOID ()
-
-  hints = WindowHints{};
-}
-
 static void
 bool_flags_hint_helper_inverted (int value, int flag, int *err)
 {
@@ -77,6 +69,127 @@ bool_hint_helper (int value, bool *place, int *err)
     }
 }
 
+extern "C" {
+
+#define BOOL_RET(val)\
+  val ? GLFW_TRUE : GLFW_FALSE;
+
+void
+glfwSetWindowAttrib (GLFWwindow *window, int attrib, int value)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+  if (value != GLFW_TRUE && value != GLFW_FALSE)
+    return;
+
+  bool enabled = (value == GLFW_TRUE);
+
+  switch (attrib)
+    {
+    case GLFW_DECORATED:
+      window->decorated = enabled;
+      SDL_SetWindowBordered(window->sdl_window, enabled);
+      break;
+    case GLFW_RESIZABLE:
+      window->resizable = enabled;
+      SDL_SetWindowResizable (window->sdl_window, enabled);
+      break;
+    case GLFW_FLOATING:
+      window->floating = enabled;
+      SDL_SetWindowAlwaysOnTop (window->sdl_window, enabled);
+      break;
+    case GLFW_AUTO_ICONIFY:
+      window->minimize_on_focus_lost = enabled;
+      if (state.focused_window == window)
+        SDL_SetHint (SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, enabled ? "1" : "0");
+      break;
+    case GLFW_FOCUS_ON_SHOW:
+      window->focus_on_show = enabled;
+      if (state.focused_window == window)
+        SDL_SetHint (SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, enabled ? "1" : "0");
+      break;
+    default:
+      std::string ctx = std::format ("Invalid attribute passed to glfwGetWindowAttrib: {}", attrib);
+      do_error_things (GLFW_INVALID_ENUM, ctx);
+    }
+}
+
+#define BOOL_RET(val)\
+  return val ? GLFW_TRUE : GLFW_FALSE;
+
+int
+glfwGetWindowAttrib (GLFWwindow *window, int attrib)
+{
+  ASSERT_GLFW_INIT (0)
+  ASSERT_MAIN_THREAD (0)
+  ASSERT_VALID_WIN (window, 0)
+
+  switch (attrib)
+    {
+    case GLFW_FOCUSED:
+      return ((state.focused_window == window)) ? GLFW_TRUE : GLFW_FALSE;
+    case GLFW_ICONIFIED:
+      BOOL_RET (window->minimized)
+    case GLFW_MAXIMIZED:
+      BOOL_RET (window->maximized)
+    case GLFW_HOVERED:
+      BOOL_RET (window->hovered)
+    case GLFW_VISIBLE:
+      BOOL_RET (!window->hidden)
+    case GLFW_RESIZABLE:
+      BOOL_RET (window->resizable)
+    case GLFW_DECORATED:
+      BOOL_RET (window->decorated)
+    case GLFW_AUTO_ICONIFY:
+      BOOL_RET (window->minimize_on_focus_lost)
+    case GLFW_FLOATING:
+      BOOL_RET (window->floating)
+    case GLFW_TRANSPARENT_FRAMEBUFFER:
+      BOOL_RET (window->transparent)
+    case GLFW_FOCUS_ON_SHOW:
+      BOOL_RET (window->focus_on_show)
+
+    case GLFW_CLIENT_API:
+      return window->client_api;
+    case GLFW_CONTEXT_CREATION_API:
+      return GLFW_NATIVE_CONTEXT_API; // No other option here.
+    case GLFW_CONTEXT_VERSION_MAJOR:
+      return window->gl_version_major;
+    case GLFW_CONTEXT_VERSION_MINOR:
+      return window->gl_version_minor;
+    case GLFW_CONTEXT_REVISION:
+      return window->gl_version_rev;
+    case GLFW_OPENGL_FORWARD_COMPAT:
+      BOOL_RET (window->gl_forward_compat)
+    case GLFW_OPENGL_DEBUG_CONTEXT:
+      BOOL_RET (window->gl_debug_context)
+    case GLFW_OPENGL_PROFILE:
+      return window->gl_profile;
+    case GLFW_CONTEXT_RELEASE_BEHAVIOR:
+      return window->gl_context_release_behavior;
+    case GLFW_CONTEXT_NO_ERROR:
+      BOOL_RET (window->gl_context_no_error)
+    case GLFW_CONTEXT_ROBUSTNESS:
+      return window->gl_context_robustness;
+
+    default:
+      std::string ctx = std::format ("Invalid attribute passed to glfwGetWindowAttrib: {}", attrib);
+      do_error_things (GLFW_INVALID_ENUM, ctx);
+    }
+
+  return 0;
+}
+
+void
+glfwDefaultWindowHints ()
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+
+  hints = WindowHints{};
+}
+
 void
 glfwWindowHint (int hint, int value)
 {
@@ -88,18 +201,23 @@ glfwWindowHint (int hint, int value)
   switch (hint)
     {
     case GLFW_RESIZABLE:
+      bool_hint_helper (value, &hints.resizable, &err);
       bool_flags_hint_helper (value, SDL_WINDOW_RESIZABLE, &err);
       break;
     case GLFW_VISIBLE:
       bool_flags_hint_helper_inverted (value, SDL_WINDOW_HIDDEN, &err);
       break;
     case GLFW_DECORATED:
+      bool_hint_helper (value, &hints.decorated, &err);
       bool_flags_hint_helper_inverted (value, SDL_WINDOW_BORDERLESS, &err);
       break;
     case GLFW_FOCUSED:
+
     case GLFW_AUTO_ICONIFY:
-      return; // global hint, not per-window, in SDL
+      bool_hint_helper (value, &hints.minimize_on_focus_lost, &err);
+      return;
     case GLFW_FLOATING:
+      bool_hint_helper (value, &hints.floating, &err);
       bool_flags_hint_helper (value, SDL_WINDOW_ALWAYS_ON_TOP, &err);
       break;
     case GLFW_MAXIMIZED:
@@ -109,6 +227,7 @@ glfwWindowHint (int hint, int value)
       bool_hint_helper (value, &hints.fullscreen_center_cursor_on_first_focus, &err);
       return;
     case GLFW_TRANSPARENT_FRAMEBUFFER:
+      bool_hint_helper (value, &hints.transparent, &err);
       bool_flags_hint_helper (value, SDL_WINDOW_TRANSPARENT, &err);
       break;
     case GLFW_FOCUS_ON_SHOW:
@@ -385,4 +504,6 @@ glfwSetWindowSizeLimits (GLFWwindow *window,
     do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
   if (!SDL_SetWindowMaximumSize (window->sdl_window, sdl_max_w, sdl_max_h))
     do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+}
+
 }

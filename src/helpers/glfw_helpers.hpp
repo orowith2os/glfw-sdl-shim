@@ -11,6 +11,16 @@
 #include <string>
 #include "sdl_scancode.hpp"
 
+struct GLVersion
+{
+  int major;
+  int minor;
+  int rev;
+};
+
+GLVersion
+get_gl_context_version ();
+
 struct ShimGlobalState {
   bool initialized = false;
   bool vulkan_loaded = false;

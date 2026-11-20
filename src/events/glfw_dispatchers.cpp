@@ -10,7 +10,11 @@ glfw_window_dispatch_event (GLFWwindow *window, SDL_WindowEvent event)
 
   SDL_WindowFlags flags = SDL_GetWindowFlags (window->sdl_window);
 
-  if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+  if (event.type == SDL_EVENT_WINDOW_HIDDEN)
+    window->hidden = true;
+  else if (event.type == SDL_EVENT_WINDOW_SHOWN)
+    window->hidden = false;
+  else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
     {
       window->should_close = true;
       if (window->close_callback)
@@ -18,6 +22,7 @@ glfw_window_dispatch_event (GLFWwindow *window, SDL_WindowEvent event)
     }
   else if (event.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
     {
+      window->hovered = true;
       SDL_SetCursor (window->cursor ? window->cursor->sdl_cursor : SDL_GetDefaultCursor ());
       do_thing_with_cursor_mode (window);
 
@@ -26,6 +31,7 @@ glfw_window_dispatch_event (GLFWwindow *window, SDL_WindowEvent event)
     }
   else if (event.type == SDL_EVENT_WINDOW_MOUSE_LEAVE)
     {
+      window->hovered = false;
       if (window->cursor_enter_callback)
         window->cursor_enter_callback (window, GLFW_FALSE);
     }
