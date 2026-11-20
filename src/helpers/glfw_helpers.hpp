@@ -41,11 +41,14 @@ struct ShimGlobalState {
   bool vulkan_loaded = false;
 
   int selected_glfw_platform = GLFW_ANY_PLATFORM;
-  GLFWerrorfun err_callback = nullptr;
   GLFWvkproc vulkan_loader = nullptr;
   uint64_t timer_start_ms = 0;
   uint64_t base_time_ms = 0;
+
+  GLFWerrorfun err_callback = nullptr;
   GLFWjoystickfun joystick_callback = nullptr;
+  GLFWmonitorfun monitor_callback = nullptr;
+
   GLFWwindow *focused_window = nullptr;
   std::vector <GLFWmonitor *> monitors;
 };

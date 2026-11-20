@@ -236,15 +236,37 @@ glfwPlatformSupported (int platform)
     }
 }
 
-// This can be called from any thread, but we don't
-// have a good way to sync it yet.
+// Nothing SHOULD go wrong with this setup...
 GLFWerrorfun
 glfwSetErrorCallback (GLFWerrorfun callback)
 {
-  GLFWerrorfun old_callback = state.err_callback;
+  GLFWerrorfun result = nullptr;
 
-  state.err_callback = callback;
+  if (!state.initialized)
+    {
+      GLFWerrorfun old_callback = state.err_callback;
+      state.err_callback = callback;
+      result = old_callback;
+    }
+  else
+    run_on_main_sync([&]()
+      {
+        GLFWerrorfun old_callback = state.err_callback;
+        state.err_callback = callback;
+        result = old_callback;
+      });
 
+  return result;
+}
+
+GLFWmonitorfun
+glfwSetMonitorCallback (GLFWmonitorfun callback)
+{
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
+
+  GLFWmonitorfun old_callback = state.monitor_callback;
+  state.monitor_callback = callback;
   return old_callback;
 }
 
