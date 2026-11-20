@@ -3,11 +3,9 @@
 #include "glfw_dispatchers.hpp"
 
 void
-glfw_window_dispatch_event (SDL_WindowEvent event)
+glfw_window_dispatch_event (GLFWwindow *window, SDL_WindowEvent event)
 {
-  GLFWwindow *window = glfw_window_from_sdl_window_id (event.windowID);
-  if (!window)
-    return;
+  ASSERT_VALID_WIN_VOID (window)
 
   SDL_WindowFlags flags = SDL_GetWindowFlags (window->sdl_window);
 
@@ -16,6 +14,19 @@ glfw_window_dispatch_event (SDL_WindowEvent event)
       window->should_close = true;
       if (window->close_callback)
         window->close_callback (window);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
+    {
+      SDL_SetCursor (window->cursor ? window->cursor->sdl_cursor : SDL_GetDefaultCursor ());
+      do_thing_with_cursor_mode (window);
+
+      if (window->cursor_enter_callback)
+        window->cursor_enter_callback (window, GLFW_TRUE);
+    }
+  else if (event.type == SDL_EVENT_WINDOW_MOUSE_LEAVE)
+    {
+      if (window->cursor_enter_callback)
+        window->cursor_enter_callback (window, GLFW_FALSE);
     }
   else if (event.type == SDL_EVENT_WINDOW_RESIZED)
     {
@@ -102,17 +113,12 @@ glfw_window_dispatch_event (SDL_WindowEvent event)
           window->fullscreen_center_cursor_on_first_focus = false;
         }
     }
-  else
-    glfw_cursor_focus_dispatch_event (event);
 }
 
 void
-glfw_key_dispatch_event (SDL_KeyboardEvent event)
+glfw_key_dispatch_event (GLFWwindow *window, SDL_KeyboardEvent event)
 {
-  GLFWwindow *window = glfw_window_from_sdl_window_id (event.windowID);
-
-  if (!window)
-    return;
+  ASSERT_VALID_WIN_VOID (window)
 
   int action = event.down
                  ? (event.repeat ? GLFW_REPEAT : GLFW_PRESS)
@@ -124,3 +130,4 @@ glfw_key_dispatch_event (SDL_KeyboardEvent event)
                           event.raw, action,
                           translate_sdl_keymod_to_glfw (window, event.mod));
 }
+

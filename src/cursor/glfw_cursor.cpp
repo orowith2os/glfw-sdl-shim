@@ -43,20 +43,6 @@ do_thing_with_cursor_mode (GLFWwindow *window)
     }
 }
 
-void
-glfw_cursor_focus_dispatch_event (SDL_WindowEvent event)
-{
-  if (event.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
-    {
-      auto window = glfw_window_from_sdl_window_id (event.windowID);
-      if (window)
-        SDL_SetCursor (window->cursor
-                         ? window->cursor->sdl_cursor
-                         : SDL_GetDefaultCursor ());
-      do_thing_with_cursor_mode (window);
-    }
-}
-
 extern "C" {
 
 void

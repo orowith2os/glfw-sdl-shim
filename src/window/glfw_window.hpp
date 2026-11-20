@@ -66,6 +66,8 @@ struct GLFWwindow {
   GLFWwindowfocusfun focus_callback = nullptr;
   GLFWmousebuttonfun mouse_button_callback = nullptr;
   GLFWframebuffersizefun framebuffer_size_callback = nullptr;
+  GLFWcursorposfun cursor_pos_callback = nullptr;
+  GLFWcursorenterfun cursor_enter_callback = nullptr;
 
   ~GLFWwindow ()
     {

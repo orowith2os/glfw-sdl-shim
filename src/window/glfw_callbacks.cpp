@@ -14,6 +14,8 @@
     return window ? std::exchange (window->member, cb) : nullptr;     \
   }
 
+SET_CB (glfwSetCursorEnterCallback,        cursor_enter_callback)
+SET_CB (glfwSetCursorPosCallback,          cursor_pos_callback)
 SET_CB (glfwSetFramebufferSizeCallback,    framebuffer_size_callback)
 SET_CB (glfwSetMouseButtonCallback,        mouse_button_callback)
 SET_CB (glfwSetWindowFocusCallback,        focus_callback)

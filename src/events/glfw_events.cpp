@@ -19,18 +19,27 @@ glfw_init_events ()
 static void
 dispatch_event (SDL_Event event)
 {
+  GLFWwindow *window = nullptr;
+  glfw_window_from_sdl_window (SDL_GetWindowFromEvent (&event), &window);
+
   if (event.type >= SDL_EVENT_WINDOW_FIRST && event.type <= SDL_EVENT_WINDOW_LAST)
-    glfw_window_dispatch_event (event.window);
+    glfw_window_dispatch_event (window, event.window);
   else if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
-    glfw_key_dispatch_event (event.key);
+    glfw_key_dispatch_event (window, event.key);
+  else if (event.type == SDL_EVENT_MOUSE_MOTION)
+    {
+      if (window && window->cursor_pos_callback)
+        window->cursor_pos_callback (window, event.motion.x, event.motion.y);
+    }
   else if (event.type == SDL_EVENT_MOUSE_WHEEL)
     {
-      GLFWwindow *window = glfw_window_from_sdl_window_id (event.wheel.windowID);
       if (window && window->scroll_callback)
         window->scroll_callback (window,
                                  static_cast<double> (event.wheel.x),
                                  static_cast<double> (event.wheel.y));
     }
+  // TODO: drop
+  // TODO: monitor
 }
 
 static void
