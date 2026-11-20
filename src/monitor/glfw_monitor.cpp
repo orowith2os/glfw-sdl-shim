@@ -38,7 +38,7 @@ glfwGetMonitorPos (GLFWmonitor *monitor,
   ASSERT_VALID_MON_VOID (monitor)
   ASSERT_MAIN_THREAD_VOID ()
 
-  SDL_Rect bounds;
+  SDL_Rect bounds{};
   if (SDL_GetDisplayBounds (monitor->sdl_displayid, &bounds))
     {
       if (xpos)
@@ -66,7 +66,7 @@ glfwGetMonitorWorkarea (GLFWmonitor *monitor,
   ASSERT_VALID_MON_VOID (monitor)
   ASSERT_MAIN_THREAD_VOID ()
 
-  SDL_Rect bounds;
+  SDL_Rect bounds{};
   if (SDL_GetDisplayUsableBounds (monitor->sdl_displayid, &bounds))
     {
       if (xpos)

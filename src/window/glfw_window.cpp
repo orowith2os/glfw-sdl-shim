@@ -1,6 +1,7 @@
 #include "glfw3.h"
 #include "helpers/glfw_helpers.hpp"
 #include "glfw_window.hpp"
+#include "monitor/glfw_monitor.hpp"
 
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
@@ -11,6 +12,98 @@
 #include <format>
 
 extern "C" {
+
+void
+glfwSetWindowMonitor (GLFWwindow *window,
+                      GLFWmonitor *monitor,
+                      int xpos, int ypos,
+                      int width, int height,
+                      int refreshRate)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+
+  if (width <= 0 || height <= 0)
+    {
+      do_error_things (GLFW_INVALID_VALUE,
+                       "Invalid window size passed to glfwSetWindowMonitor.");
+      return;
+    }
+
+  if (refreshRate < 0 && refreshRate != GLFW_DONT_CARE)
+    {
+      do_error_things (GLFW_INVALID_VALUE,
+                       "Invalid refresh rate passed to glfwSetWindowMonitor.");
+      return;
+    }
+
+  SDL_Window *sdl_win = window->sdl_window;
+  bool was_fullscreen = (SDL_GetWindowFlags (sdl_win) & SDL_WINDOW_FULLSCREEN) != 0;
+
+  if (!monitor)
+    {
+      if (was_fullscreen)
+        {
+          if (!SDL_SetWindowFullscreen (sdl_win, false))
+            {
+              do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+              return;
+            }
+        }
+
+      if (!SDL_SetWindowSize (sdl_win, width, height))
+        {
+          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+          return;
+        }
+
+      if (!SDL_SetWindowPosition (sdl_win, xpos, ypos))
+        {
+          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+          return;
+        }
+    }
+  else
+    {
+      SDL_DisplayID display_id = monitor->sdl_displayid;
+
+      // Get it as close as possible, if possible
+      SDL_Rect bounds{};
+      if (SDL_GetDisplayBounds (display_id, &bounds))
+        SDL_SetWindowPosition (sdl_win, bounds.x, bounds.y);
+
+      float target_refresh = (refreshRate == GLFW_DONT_CARE)
+                               ? 0.0f
+                               : static_cast<float> (refreshRate);
+
+      SDL_DisplayMode closest_mode{};
+      if (!SDL_GetClosestFullscreenDisplayMode (display_id,
+                                                width, height,
+                                                target_refresh,
+                                                true,
+                                                &closest_mode))
+        {
+          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+          return;
+        }
+
+      if (!SDL_SetWindowFullscreenMode (sdl_win, &closest_mode))
+        {
+          do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+          return;
+        }
+
+      if (!was_fullscreen)
+        {
+          if (!SDL_SetWindowFullscreen (sdl_win, true))
+            {
+              do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+              return;
+            }
+        }
+    }
+}
 
 GLFWmonitor *
 glfwGetWindowMonitor (GLFWwindow *window)
