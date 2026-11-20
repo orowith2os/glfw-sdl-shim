@@ -385,10 +385,10 @@ glfwSetWindowIcon (GLFWwindow *window, int count, const GLFWimage *images)
   if (count == 0 || !images)
     return; // SDL doesn't have a "default" concept
 
-  std::span<const GLFWimage> imageSpan (images, static_cast<std::size_t> (count));
+  std::span<const GLFWimage> image_span (images, static_cast<std::size_t> (count));
 
   SDL_Surface *valid_surface = nullptr;
-  for (const GLFWimage &img : imageSpan)
+  for (const GLFWimage& img : image_span)
     {
       auto surface = sdl_surface_from_glfw_image (&img);
 
