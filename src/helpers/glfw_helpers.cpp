@@ -143,3 +143,11 @@ assert_glfw_init ()
       return GLFW_FALSE;
     }
 }
+
+bool
+is_printable_glfw_key (int key)
+{
+  return key == GLFW_KEY_KP_EQUAL
+      || (key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_ADD)
+      || (key >= GLFW_KEY_APOSTROPHE && key <= GLFW_KEY_WORLD_2);
+}

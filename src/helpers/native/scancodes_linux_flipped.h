@@ -6,12 +6,15 @@ struct sdl_scancode_table_from_linux {
     Uint16 map[SDL_SCANCODE_COUNT];
 };
 
+constexpr int linux_scancode_table_size =
+  (int) (sizeof (linux_scancode_table) / sizeof (linux_scancode_table[0]));
+
 constexpr sdl_scancode_table_from_linux
 build_sdl_scancode_table_from_linux ()
 {
   sdl_scancode_table_from_linux t{};
 
-  for (int i = 0; i < (int) (sizeof (linux_scancode_table) / sizeof (linux_scancode_table[0])); ++i)
+  for (int i = 0; i < linux_scancode_table_size; ++i)
     {
       const SDL_Scancode sc = linux_scancode_table[i];
       if (sc == SDL_SCANCODE_UNKNOWN || (int) sc < 0 || (int) sc >= SDL_SCANCODE_COUNT)
@@ -38,4 +41,12 @@ constexpr int
 sdl_scancode_to_linux (SDL_Scancode sc)
 {
     return ((int) sc >= 0 && (int) sc < SDL_SCANCODE_COUNT) ? sdl_to_linux_table.map[sc] : 0;
+}
+
+constexpr SDL_Scancode
+linux_to_sdl_scancode (int linux_code)
+{
+  return (linux_code >= 0 && linux_code < linux_scancode_table_size)
+           ? linux_scancode_table[linux_code]
+           : SDL_SCANCODE_UNKNOWN;
 }

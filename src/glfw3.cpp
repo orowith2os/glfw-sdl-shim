@@ -302,4 +302,34 @@ glfwGetKeyScancode (int key)
     return -1;
 }
 
+const char *
+glfwGetKeyName (int key, int scancode)
+{
+  ASSERT_GLFW_INIT (nullptr)
+  ASSERT_MAIN_THREAD (nullptr)
+  SDL_Scancode sdl_scancode;
+
+  const char *platform = SDL_GetPlatform ();
+  if (SDL_strcmp (platform, "Linux") == 0)
+    {
+      if (key == GLFW_KEY_UNKNOWN)
+        sdl_scancode = linux_to_sdl_scancode (scancode);
+      else
+        sdl_scancode = translate_glfw_key_to_sdl_scancode (key);
+    }
+  else
+    return nullptr;
+
+  int glfw_key = translate_sdl_scancode_to_glfw (sdl_scancode);
+  if (!is_printable_glfw_key (glfw_key))
+    return nullptr;
+
+  const SDL_Keycode keycode = SDL_GetKeyFromScancode (sdl_scancode, SDL_KMOD_NONE, false);
+  if (keycode == SDLK_UNKNOWN)
+    return nullptr;
+
+  const char *name = SDL_GetKeyName (keycode);
+  return (name && *name != '\0') ? name : nullptr;
+}
+
 } // extern "C"

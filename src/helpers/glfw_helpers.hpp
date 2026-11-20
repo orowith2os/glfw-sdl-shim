@@ -11,35 +11,6 @@
 #include <string>
 #include "sdl_scancode.hpp"
 
-SDL_Surface *
-sdl_surface_from_glfw_image (const GLFWimage *image);
-
-void
-glfw_window_from_sdl_window (SDL_Window *sdl_window,
-                             GLFWwindow **window);
-
-GLFWwindow *
-glfw_window_from_sdl_window_id (SDL_WindowID id);
-
-void
-glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
-                                  GLFWmonitor **monitor);
-
-template <typename Func>
-[[maybe_unused]]
-static bool
-run_on_main_sync (Func&& func)
-{
-  using FuncType = std::remove_reference_t<Func>;
-  return SDL_RunOnMainThread (
-    [](void *userdata) {
-      (*static_cast<FuncType *>(userdata)) ();
-    },
-    &func,
-    true
-  );
-}
-
 struct ShimGlobalState {
   bool initialized = false;
   bool vulkan_loaded = false;
@@ -66,6 +37,38 @@ struct ShimThreadState {
 
 inline ShimGlobalState state;
 inline thread_local ShimThreadState thread_state;
+
+template <typename Func>
+[[maybe_unused]]
+static bool
+run_on_main_sync (Func&& func)
+{
+  using FuncType = std::remove_reference_t<Func>;
+  return SDL_RunOnMainThread (
+    [](void *userdata) {
+      (*static_cast<FuncType *>(userdata)) ();
+    },
+    &func,
+    true
+  );
+}
+
+SDL_Surface *
+sdl_surface_from_glfw_image (const GLFWimage *image);
+
+void
+glfw_window_from_sdl_window (SDL_Window *sdl_window,
+                             GLFWwindow **window);
+
+GLFWwindow *
+glfw_window_from_sdl_window_id (SDL_WindowID id);
+
+void
+glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
+                                  GLFWmonitor **monitor);
+
+bool
+is_printable_glfw_key (int key);
 
 std::optional<std::string_view>
 err_to_string (int err);
