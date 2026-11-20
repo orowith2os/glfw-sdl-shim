@@ -14,6 +14,25 @@
 extern "C" {
 
 void
+glfwSetWindowAspectRatio (GLFWwindow *window,
+                          int numer, int denom)
+{
+  ASSERT_GLFW_INIT_VOID ()
+  ASSERT_MAIN_THREAD_VOID ()
+  ASSERT_VALID_WIN_VOID (window)
+
+  if (numer == GLFW_DONT_CARE && denom == GLFW_DONT_CARE)
+    SDL_SetWindowAspectRatio (window->sdl_window, 0.0f, 0.0f);
+  else if (numer <= 0 || denom <= 0)
+    do_error_things (GLFW_INVALID_VALUE, "Invalid aspect ratio passed to glfwSetWindowAspectRatio.");
+  else
+    {
+      float aspect = static_cast<float> (numer) / static_cast<float> (denom);
+      SDL_SetWindowAspectRatio(window->sdl_window, aspect, aspect);
+    }
+}
+
+void
 glfwSetWindowMonitor (GLFWwindow *window,
                       GLFWmonitor *monitor,
                       int xpos, int ypos,
