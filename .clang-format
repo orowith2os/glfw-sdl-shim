@@ -1,0 +1,107 @@
+---
+Language: Cpp
+BasedOnStyle: GNU
+Standard: c++20
+
+# Indentation
+IndentWidth: 2
+ContinuationIndentWidth: 2
+TabWidth: 8
+UseTab: Never
+IndentCaseLabels: false
+IndentExternBlock: NoIndent
+IndentPPDirectives: None
+NamespaceIndentation: None
+AccessModifierOffset: -2
+LambdaBodyIndentation: OuterScope
+
+# Braces: GNU (own line, indented one level inside control statements)
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: false
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: true
+  BeforeWhile: true
+  IndentBraces: true
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+# Function definitions: return type on its own line
+AlwaysBreakAfterReturnType: AllDefinitions
+AlwaysBreakAfterDefinitionReturnType: All
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortLambdasOnASingleLine: None
+AllowShortEnumsOnASingleLine: false
+
+# Line breaking: respect existing manual breaks
+ColumnLimit: 0
+BinPackArguments: true
+BinPackParameters: true
+AlignAfterOpenBracket: Align
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+AlignOperands: Align
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: None
+AlignEscapedNewlines: DontAlign
+
+# Spacing
+SpaceBeforeParens: Always
+SpaceBeforeCpp11BracedList: false
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpacesBeforeTrailingComments: 1
+SpaceInEmptyParentheses: false
+SpacesInAngles: Never
+Cpp11BracedListStyle: true
+
+# Pointers/references: `T *p`, `T& r`
+DerivePointerAlignment: false
+PointerAlignment: Right
+ReferenceAlignment: Left
+
+# Blank lines / comments
+KeepEmptyLinesAtTheStartOfBlocks: true
+MaxEmptyLinesToKeep: 1
+FixNamespaceComments: true
+ReflowComments: false
+
+# Includes: keep author's order
+SortIncludes: Never
+IncludeBlocks: Preserve
+
+# Semicolon-less statement macros used throughout the codebase
+StatementMacros:
+  - ASSERT_GLFW_INIT
+  - ASSERT_GLFW_INIT_VOID
+  - ASSERT_MAIN_THREAD
+  - ASSERT_MAIN_THREAD_VOID
+  - ASSERT_VALID_WIN
+  - ASSERT_VALID_WIN_VOID
+  - ASSERT_VALID_MON
+  - ASSERT_VALID_MON_VOID
+  - ASSERT_VULKAN_LOADED_INT
+  - ASSERT_VULKAN_LOADED_PTR
+  - ENSURE_VULKAN_INIT
+  - SET_CB
+  - BOOL_RET
+...

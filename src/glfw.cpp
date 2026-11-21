@@ -83,21 +83,21 @@ glfwTerminate ()
 
   SDL_QuitSubSystem (SDL_INIT_VIDEO);
 
-  state  = {};
+  state = {};
 }
 
 void
 glfwInitHint (int hint, int value)
 {
   if (state.initialized)
-    ASSERT_MAIN_THREAD_VOID()
+    ASSERT_MAIN_THREAD_VOID ()
 
   int err = GLFW_NO_ERROR;
   std::string_view ctx = "";
 
   switch (hint)
     {
-/* Shared */
+      /* Shared */
     case GLFW_PLATFORM:
       switch (value)
         {
@@ -150,7 +150,7 @@ glfwInitHint (int hint, int value)
         }
       break;
 
-/* macOS */
+      /* macOS */
     case GLFW_COCOA_CHDIR_RESOURCES:
     case GLFW_COCOA_MENUBAR:
       switch (value)
@@ -162,24 +162,24 @@ glfwInitHint (int hint, int value)
         }
       break;
 
-/* Wayland */
+      /* Wayland */
     case GLFW_WAYLAND_LIBDECOR:
       switch (value)
         {
         // This is a bit weird. ALLOW is probably what the GLFW dev intended.
         case GLFW_WAYLAND_PREFER_LIBDECOR:
-           if (!SDL_SetHint (SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "1"))
-             {
-               err = GLFW_PLATFORM_ERROR;
-               ctx = SDL_GetError ();
-             }
+          if (!SDL_SetHint (SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "1"))
+            {
+              err = GLFW_PLATFORM_ERROR;
+              ctx = SDL_GetError ();
+            }
           break;
         case GLFW_WAYLAND_DISABLE_LIBDECOR:
-           if (!SDL_SetHint (SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "0"))
-             {
-               err = GLFW_PLATFORM_ERROR;
-               ctx = SDL_GetError ();
-             }
+          if (!SDL_SetHint (SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "0"))
+            {
+              err = GLFW_PLATFORM_ERROR;
+              ctx = SDL_GetError ();
+            }
           break;
         default:
           err = GLFW_INVALID_VALUE;
@@ -187,7 +187,7 @@ glfwInitHint (int hint, int value)
         }
       break;
 
-/* X11 */
+      /* X11 */
     case GLFW_X11_XCB_VULKAN_SURFACE:
       switch (value)
         {
@@ -207,7 +207,7 @@ glfwInitHint (int hint, int value)
       break;
     }
 
-  if (err == GLFW_INVALID_VALUE && ctx.empty())
+  if (err == GLFW_INVALID_VALUE && ctx.empty ())
     ctx = "Invalid value for hint";
 
   do_error_things (err, ctx);
@@ -222,7 +222,7 @@ glfwGetError (const char **description)
 
   if (description)
     {
-      if (last_err_code && !thread_state.last_api_error_ctx.empty())
+      if (last_err_code && !thread_state.last_api_error_ctx.empty ())
         *description = thread_state.last_api_error_ctx.c_str ();
       else
         *description = nullptr;
@@ -271,7 +271,7 @@ glfwSetErrorCallback (GLFWerrorfun callback)
       result = old_callback;
     }
   else
-    run_on_main_sync([&]()
+    run_on_main_sync ([&] ()
       {
         GLFWerrorfun old_callback = state.err_callback;
         state.err_callback = callback;
@@ -303,7 +303,7 @@ glfwGetVersion (int *major, int *minor, int *rev)
     *rev = GLFW_PATCH_VERSION;
 }
 
-const char*
+const char *
 glfwGetVersionString ()
 {
   // This (can) have some debug info that may be useful to users and devs

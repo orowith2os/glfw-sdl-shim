@@ -9,7 +9,7 @@ GLVersion
 get_gl_context_version ()
 {
   GLVersion version{};
-  const char *version_str = (const char *)glGetString(GL_VERSION);
+  const char *version_str = (const char *)glGetString (GL_VERSION);
   if (!version_str)
     return version;
 
@@ -38,9 +38,9 @@ glfw_window_from_sdl_window (SDL_Window *sdl_window,
 {
   SDL_PropertiesID props = SDL_GetWindowProperties (sdl_window);
   *window =
-    static_cast<GLFWwindow*> (SDL_GetPointerProperty (props,
-                                                      "gay.oro.glfw_window_pointer",
-                                                      nullptr));
+    static_cast<GLFWwindow *> (SDL_GetPointerProperty (props,
+                                                       "gay.oro.glfw_window_pointer",
+                                                       nullptr));
 }
 
 GLFWmonitor *
@@ -64,9 +64,9 @@ get_glfw_monitor_from_sdl_display_id (SDL_DisplayID sdl_display,
 {
   SDL_PropertiesID props = SDL_GetDisplayProperties (sdl_display);
   *monitor =
-    static_cast<GLFWmonitor*> (SDL_GetPointerProperty (props,
-                                                       "gay.oro.glfw_monitor_pointer",
-                                                       nullptr));
+    static_cast<GLFWmonitor *> (SDL_GetPointerProperty (props,
+                                                        "gay.oro.glfw_monitor_pointer",
+                                                        nullptr));
 }
 
 GLFWwindow *
@@ -87,7 +87,9 @@ glfw_window_from_sdl_window_id (SDL_WindowID id)
 std::optional<std::string_view>
 err_to_string (int err)
 {
-#define CASE(x) case x: return #x
+#define CASE(x) \
+  case x: \
+    return #x
   switch (err)
     {
       CASE (GLFW_NO_ERROR);
@@ -124,7 +126,7 @@ do_error_things (int err, std::string_view ctx)
   if (error_ctx)
     {
       ctx_clarified += *error_ctx;
-      if (!ctx.empty())
+      if (!ctx.empty ())
         {
           ctx_clarified += ": ";
           ctx_clarified += ctx;
@@ -135,7 +137,7 @@ do_error_things (int err, std::string_view ctx)
   else
     {
       ctx_clarified += std::format ("Unknown integer value ({}), please file a bug.", err);
-      if (!ctx.empty())
+      if (!ctx.empty ())
         {
           ctx_clarified += " Additional error context: ";
           ctx_clarified += ctx;
@@ -155,7 +157,7 @@ assert_main_thread ()
 {
   if (!glfwInit ())
     return GLFW_FALSE;
-  if (!SDL_IsMainThread())
+  if (!SDL_IsMainThread ())
     {
       do_error_things (GLFW_INVALID_VALUE, "Called glfwDefaultWindowHints outside of the main thread.");
       return GLFW_FALSE;
@@ -178,7 +180,5 @@ assert_glfw_init ()
 bool
 is_printable_glfw_key (int key)
 {
-  return key == GLFW_KEY_KP_EQUAL
-      || (key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_ADD)
-      || (key >= GLFW_KEY_APOSTROPHE && key <= GLFW_KEY_WORLD_2);
+  return key == GLFW_KEY_KP_EQUAL || (key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_ADD) || (key >= GLFW_KEY_APOSTROPHE && key <= GLFW_KEY_WORLD_2);
 }

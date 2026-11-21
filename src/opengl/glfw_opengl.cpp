@@ -11,7 +11,7 @@ glfwGetCurrentContext ()
   ASSERT_GLFW_INIT (nullptr)
   GLFWwindow *window = nullptr;
 
-  run_on_main_sync([&]()
+  run_on_main_sync ([&] ()
     {
       auto sdl_window = SDL_GL_GetCurrentWindow ();
       if (sdl_window)
@@ -33,7 +33,7 @@ glfwGetProcAddress (const char *procname)
 
   GLFWglproc ptr = nullptr;
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       if (!SDL_GL_GetCurrentContext ())
         return;
@@ -54,7 +54,7 @@ glfwExtensionSupported (const char *extension)
   if (!extension || *extension == '\0')
     return GLFW_FALSE;
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       if (!SDL_GL_GetCurrentContext ())
         val = GLFW_FALSE;
@@ -77,9 +77,9 @@ glfwMakeContextCurrent (GLFWwindow *window)
       return;
     }
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
-      if (!SDL_GL_MakeCurrent(window->sdl_window, window->gl_context))
+      if (!SDL_GL_MakeCurrent (window->sdl_window, window->gl_context))
         do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
     });
 }
@@ -90,7 +90,7 @@ glfwSwapBuffers (GLFWwindow *window)
 {
   ASSERT_GLFW_INIT_VOID ()
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       if (!SDL_GL_SwapWindow (window->sdl_window))
         do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
@@ -103,7 +103,7 @@ glfwSwapInterval (int interval)
 {
   ASSERT_GLFW_INIT_VOID ()
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       if (!SDL_GL_SetSwapInterval (interval))
         // We might not support any tearing extensions.

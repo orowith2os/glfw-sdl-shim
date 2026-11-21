@@ -38,7 +38,8 @@ struct WindowHints
   std::string wayland_app_id;
 };
 
-struct GLFWwindow {
+struct GLFWwindow
+{
   // A window and GL context are 1-1 in GLFW,
   // you can't do multiple.
   SDL_Window *sdl_window = nullptr;
@@ -100,24 +101,24 @@ struct GLFWwindow {
   GLFWcharfun char_callback = nullptr;
 
   ~GLFWwindow ()
-    {
-      auto old_window = SDL_GL_GetCurrentWindow ();
-      auto old_context = SDL_GL_GetCurrentContext ();
+  {
+    auto old_window = SDL_GL_GetCurrentWindow ();
+    auto old_context = SDL_GL_GetCurrentContext ();
 
-      if (cursor)
-        glfwDestroyCursor (cursor);
+    if (cursor)
+      glfwDestroyCursor (cursor);
 
-      if (gl_context)
-        SDL_GL_DestroyContext (gl_context);
+    if (gl_context)
+      SDL_GL_DestroyContext (gl_context);
 
-      if (sdl_window)
-        SDL_DestroyWindow (sdl_window);
+    if (sdl_window)
+      SDL_DestroyWindow (sdl_window);
 
-      if (old_window && old_context &&
-          old_window != sdl_window &&
-          old_context != gl_context)
-        SDL_GL_MakeCurrent(old_window, old_context);
-    }
+    if (old_window && old_context &&
+        old_window != sdl_window &&
+        old_context != gl_context)
+      SDL_GL_MakeCurrent (old_window, old_context);
+  }
 };
 
 inline WindowHints hints;

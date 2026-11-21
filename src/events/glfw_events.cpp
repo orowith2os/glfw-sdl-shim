@@ -40,7 +40,7 @@ dispatch_event (SDL_Event event)
     {
       SDL_DisplayID sdl_monitor = event.display.displayID;
       GLFWmonitor *monitor = nullptr;
-      get_glfw_monitor_from_sdl_display_id(sdl_monitor, &monitor);
+      get_glfw_monitor_from_sdl_display_id (sdl_monitor, &monitor);
 
       if (monitor && state.monitor_callback)
         state.monitor_callback (monitor, GLFW_DISCONNECTED);
@@ -66,7 +66,6 @@ dispatch_event (SDL_Event event)
       int pressed = event.button.down ? GLFW_PRESS : GLFW_RELEASE;
       int button = (event.button.button < 6) ? sdl_to_glfw_btn[event.button.button] : -1;
 
-
       if (window->mouse_button_callback)
         window->mouse_button_callback (window, button, pressed, window->modifiers);
     }
@@ -75,10 +74,10 @@ dispatch_event (SDL_Event event)
 }
 
 static void
-drain_event_queue()
+drain_event_queue ()
 {
   SDL_Event event;
-  while (SDL_PollEvent(&event))
+  while (SDL_PollEvent (&event))
     {
       if (event.type != shim_wakeup_event_type)
         dispatch_event (event);
@@ -102,14 +101,15 @@ glfwWaitEvents ()
   glfw_init_events ();
 
   SDL_Event event;
-  if (SDL_WaitEvent(&event))
+  if (SDL_WaitEvent (&event))
     {
       if (event.type != shim_wakeup_event_type)
         dispatch_event (event);
 
       drain_event_queue ();
-    } else
-      do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
+    }
+  else
+    do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
 }
 
 void
@@ -134,8 +134,8 @@ glfwWaitEventsTimeout (double timeout)
 
   if (std::isinf (timeout))
     {
-        glfwWaitEvents ();
-        return;
+      glfwWaitEvents ();
+      return;
     }
 
   auto duration = std::chrono::duration<double> (timeout);
@@ -144,10 +144,10 @@ glfwWaitEventsTimeout (double timeout)
 
   SDL_Event event;
 
-  if (SDL_WaitEventTimeout(&event, timeout_ms))
+  if (SDL_WaitEventTimeout (&event, timeout_ms))
     {
       if (event.type != shim_wakeup_event_type)
-          dispatch_event (event);
+        dispatch_event (event);
       drain_event_queue ();
     }
 }
@@ -155,7 +155,7 @@ glfwWaitEventsTimeout (double timeout)
 void
 glfwPostEmptyEvent ()
 {
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       glfw_init_events ();
     });
@@ -163,7 +163,7 @@ glfwPostEmptyEvent ()
   SDL_Event event{};
   event.type = shim_wakeup_event_type;
 
-  if (!SDL_PushEvent(&event))
+  if (!SDL_PushEvent (&event))
     do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
 }
 

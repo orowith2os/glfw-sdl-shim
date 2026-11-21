@@ -13,15 +13,15 @@ bool_flags_hint_helper_inverted (int value, int flag, int *err)
 {
   switch (value)
     {
-      case GLFW_TRUE:
-        hints.flags &= ~flag;
-        break;
-      case GLFW_FALSE:
-        hints.flags |= flag;
-        break;
-      default:
-        *err = GLFW_INVALID_VALUE;
-        break;
+    case GLFW_TRUE:
+      hints.flags &= ~flag;
+      break;
+    case GLFW_FALSE:
+      hints.flags |= flag;
+      break;
+    default:
+      *err = GLFW_INVALID_VALUE;
+      break;
     }
 }
 
@@ -30,15 +30,15 @@ bool_flags_hint_helper (int value, int flag, int *err)
 {
   switch (value)
     {
-      case GLFW_TRUE:
-        hints.flags |= flag;
-        break;
-      case GLFW_FALSE:
-        hints.flags &= ~flag;
-        break;
-      default:
-        *err = GLFW_INVALID_VALUE;
-        break;
+    case GLFW_TRUE:
+      hints.flags |= flag;
+      break;
+    case GLFW_FALSE:
+      hints.flags &= ~flag;
+      break;
+    default:
+      *err = GLFW_INVALID_VALUE;
+      break;
     }
 }
 
@@ -71,7 +71,7 @@ bool_hint_helper (int value, bool *place, int *err)
 
 extern "C" {
 
-#define BOOL(val)\
+#define BOOL(val) \
   val ? GLFW_TRUE : GLFW_FALSE;
 
 void
@@ -89,7 +89,7 @@ glfwSetWindowAttrib (GLFWwindow *window, int attrib, int value)
     {
     case GLFW_DECORATED:
       window->decorated = enabled;
-      SDL_SetWindowBordered(window->sdl_window, enabled);
+      SDL_SetWindowBordered (window->sdl_window, enabled);
       break;
     case GLFW_RESIZABLE:
       window->resizable = enabled;
@@ -115,7 +115,7 @@ glfwSetWindowAttrib (GLFWwindow *window, int attrib, int value)
     }
 }
 
-#define BOOL_RET(val)\
+#define BOOL_RET(val) \
   return val ? GLFW_TRUE : GLFW_FALSE;
 
 int
@@ -328,14 +328,14 @@ glfwWindowHint (int hint, int value)
       ctx = "Unknown enum variant for glfwWindowHint. File a bug, if it's supposed to be valid.";
     }
 
-  if (err == GLFW_INVALID_VALUE && ctx.empty())
+  if (err == GLFW_INVALID_VALUE && ctx.empty ())
     ctx = "Invalid value for hint";
 
   do_error_things (err, ctx);
 }
 
 void
-glfwWindowHintString (int hint, const char* value)
+glfwWindowHintString (int hint, const char *value)
 {
   ASSERT_MAIN_THREAD_VOID ();
 
@@ -364,7 +364,7 @@ glfwWindowHintString (int hint, const char* value)
       ctx = "Invalid string window hint";
     }
 
-  if (err == GLFW_INVALID_VALUE && ctx.empty())
+  if (err == GLFW_INVALID_VALUE && ctx.empty ())
     ctx = "Invalid value for hint";
 
   if (err != GLFW_NO_ERROR)
@@ -447,7 +447,7 @@ glfwSetInputMode (GLFWwindow *window, int mode, int value)
       ctx = "Unknown enum variant for glfwSetInputMode. File a bug.";
     }
 
-  if (err == GLFW_INVALID_VALUE && ctx.empty())
+  if (err == GLFW_INVALID_VALUE && ctx.empty ())
     ctx = "Invalid value for hint";
 
   do_error_things (err, ctx);
@@ -490,7 +490,7 @@ glfwSetWindowSizeLimits (GLFWwindow *window,
     }
 
   // no-op
-  SDL_WindowFlags flags = SDL_GetWindowFlags(window->sdl_window);
+  SDL_WindowFlags flags = SDL_GetWindowFlags (window->sdl_window);
   if (!(flags & SDL_WINDOW_RESIZABLE))
     return;
 
@@ -505,5 +505,4 @@ glfwSetWindowSizeLimits (GLFWwindow *window,
   if (!SDL_SetWindowMaximumSize (window->sdl_window, sdl_max_w, sdl_max_h))
     do_error_things (GLFW_PLATFORM_ERROR, SDL_GetError ());
 }
-
 }

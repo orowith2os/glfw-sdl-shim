@@ -16,7 +16,7 @@ struct GLFWmonitor
   void *user_pointer = nullptr;
 
   ~GLFWmonitor ()
-    {
-      std::erase (state.monitors, this);
-    }
+  {
+    std::erase (state.monitors, this);
+  }
 };

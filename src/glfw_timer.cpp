@@ -16,8 +16,8 @@ seconds_to_ms (double time_s)
   using DoubleSeconds = std::chrono::duration<double>;
   using UInt64Ms = std::chrono::duration<uint64_t, std::milli>;
 
-  auto ms_duration = std::chrono::round<UInt64Ms>(DoubleSeconds(time_s));
-  return ms_duration.count();
+  auto ms_duration = std::chrono::round<UInt64Ms> (DoubleSeconds (time_s));
+  return ms_duration.count ();
 }
 
 extern "C" {
@@ -30,7 +30,7 @@ glfwGetTime ()
   if (!state.initialized)
     return 0.0;
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       const uint64_t elapsed = SDL_GetTicks () - state.base_time_ms;
       time = static_cast<double> (state.timer_start_ms + elapsed) / 1000.0;
@@ -52,9 +52,9 @@ glfwSetTime (double time_s)
       return;
     }
 
-uint64_t time = seconds_to_ms (time_s);
+  uint64_t time = seconds_to_ms (time_s);
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       state.base_time_ms = SDL_GetTicks ();
       state.timer_start_ms = time;

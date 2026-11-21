@@ -45,7 +45,7 @@ do_thing_with_cursor_mode (GLFWwindow *window)
 extern "C" {
 
 void
-glfwGetCursorPos (GLFWwindow* window, double* xpos, double* ypos)
+glfwGetCursorPos (GLFWwindow *window, double *xpos, double *ypos)
 {
   if (xpos)
     *xpos = 0;
@@ -112,7 +112,7 @@ glfwCreateCursor (const GLFWimage *image, int xhot, int yhot)
       return nullptr;
     }
 
-  SDL_Cursor* cursor = SDL_CreateColorCursor (surface, xhot, yhot);
+  SDL_Cursor *cursor = SDL_CreateColorCursor (surface, xhot, yhot);
   if (!cursor)
     {
       delete glfw_cursor;

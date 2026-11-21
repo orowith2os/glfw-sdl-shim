@@ -116,9 +116,8 @@ glfw_window_dispatch_event (GLFWwindow *window, SDL_WindowEvent event)
           int w = 0;
           int h = 0;
           glfwGetWindowSize (window, &w, &h);
-          SDL_WarpMouseInWindow (window->sdl_window, w/2.0f, h/2.0f);
+          SDL_WarpMouseInWindow (window->sdl_window, w / 2.0f, h / 2.0f);
           window->fullscreen_center_cursor_on_first_focus = false;
         }
     }
 }
-

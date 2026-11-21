@@ -48,7 +48,7 @@ glfw_key_dispatch_event (GLFWwindow *window, SDL_KeyboardEvent event)
       if (action == GLFW_RELEASE && window->sticky_keys)
         window->keys[key] = GAY_ORO_GLFW_STICK;
       else
-        window->keys[key] = (char) (action == GLFW_REPEAT ? GLFW_PRESS : action);
+        window->keys[key] = (char)(action == GLFW_REPEAT ? GLFW_PRESS : action);
     }
 
   if (window->key_callback)
@@ -144,5 +144,4 @@ glfwGetKeyName (int key, int scancode)
   const char *name = SDL_GetKeyName (keycode);
   return (name && *name != '\0') ? name : nullptr;
 }
-
 }

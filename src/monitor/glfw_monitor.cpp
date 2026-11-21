@@ -4,58 +4,58 @@
 static int
 countBits (uint32_t mask)
 {
-    int n = 0;
-    while (mask)
-      {
-        n += mask & 1;
-        mask >>= 1;
-      }
-    return n;
+  int n = 0;
+  while (mask)
+    {
+      n += mask & 1;
+      mask >>= 1;
+    }
+  return n;
 }
 
 // copied from GLFW
 static void
 split_bpp (int bpp, int *red, int *green, int *blue)
 {
-    int delta;
+  int delta;
 
-    // We assume that by 32 the user really meant 24
-    if (bpp == 32)
-        bpp = 24;
+  // We assume that by 32 the user really meant 24
+  if (bpp == 32)
+    bpp = 24;
 
-    // Convert "bits per pixel" to red, green & blue sizes
+  // Convert "bits per pixel" to red, green & blue sizes
 
-    *red = *green = *blue = bpp / 3;
-    delta = bpp - (*red * 3);
-    if (delta >= 1)
-        *green = *green + 1;
+  *red = *green = *blue = bpp / 3;
+  delta = bpp - (*red * 3);
+  if (delta >= 1)
+    *green = *green + 1;
 
-    if (delta == 2)
-        *red = *red + 1;
+  if (delta == 2)
+    *red = *red + 1;
 }
 
 GLFWvidmode
 sdl_display_mode_to_vidmode (const SDL_DisplayMode *m)
 {
-    GLFWvidmode out{};
-    out.width       = m->w;
-    out.height      = m->h;
-    out.refreshRate = (int) (m->refresh_rate + 0.5f); // float in SDL3
+  GLFWvidmode out{};
+  out.width = m->w;
+  out.height = m->h;
+  out.refreshRate = (int)(m->refresh_rate + 0.5f); // float in SDL3
 
-    const SDL_PixelFormatDetails *d = SDL_GetPixelFormatDetails (m->format);
-    if (d && d->Rmask && d->Gmask && d->Bmask)
-      {
-        out.redBits   = countBits (d->Rmask);
-        out.greenBits = countBits (d->Gmask);
-        out.blueBits  = countBits (d->Bmask);
-      }
-    else
-      {
-        int bpp = d ? d->bits_per_pixel : 24;
-        split_bpp (bpp, &out.redBits, &out.greenBits, &out.blueBits);
-      }
+  const SDL_PixelFormatDetails *d = SDL_GetPixelFormatDetails (m->format);
+  if (d && d->Rmask && d->Gmask && d->Bmask)
+    {
+      out.redBits = countBits (d->Rmask);
+      out.greenBits = countBits (d->Gmask);
+      out.blueBits = countBits (d->Bmask);
+    }
+  else
+    {
+      int bpp = d ? d->bits_per_pixel : 24;
+      split_bpp (bpp, &out.redBits, &out.greenBits, &out.blueBits);
+    }
 
-    return out;
+  return out;
 }
 
 bool
@@ -153,7 +153,6 @@ glfwGetMonitorPos (GLFWmonitor *monitor,
     }
 }
 
-
 void
 glfwGetMonitorWorkarea (GLFWmonitor *monitor,
                         int *xpos, int *ypos,
@@ -209,9 +208,9 @@ glfwGetMonitorPhysicalSize (GLFWmonitor *monitor,
   float dpi = 96.0f * scale; // GLFW also assumes a default 96 DPI
 
   if (widthMM)
-    *widthMM  = (int) (mode->w * 25.4f / dpi); // GLFW also does 25.4f.
+    *widthMM = (int)(mode->w * 25.4f / dpi); // GLFW also does 25.4f.
   if (heightMM)
-    *heightMM = (int) (mode->h * 25.4f / dpi);
+    *heightMM = (int)(mode->h * 25.4f / dpi);
 }
 
 void
@@ -247,7 +246,7 @@ glfwSetMonitorUserPointer (GLFWmonitor *monitor, void *pointer)
   ASSERT_GLFW_INIT_VOID ()
   ASSERT_VALID_MON_VOID (monitor)
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       monitor->user_pointer = pointer;
     });
@@ -261,7 +260,7 @@ glfwGetMonitorUserPointer (GLFWmonitor *monitor)
   ASSERT_VALID_MON (monitor, nullptr)
   void *ptr = nullptr;
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       ptr = monitor->user_pointer;
     });

@@ -28,7 +28,7 @@ glfwSetWindowAspectRatio (GLFWwindow *window,
   else
     {
       float aspect = static_cast<float> (numer) / static_cast<float> (denom);
-      SDL_SetWindowAspectRatio(window->sdl_window, aspect, aspect);
+      SDL_SetWindowAspectRatio (window->sdl_window, aspect, aspect);
     }
 }
 
@@ -227,7 +227,7 @@ glfwSetWindowOpacity (GLFWwindow *window, float opacity)
 }
 
 void
-glfwGetWindowPos (GLFWwindow* window, int* xpos, int* ypos)
+glfwGetWindowPos (GLFWwindow *window, int *xpos, int *ypos)
 {
   if (xpos)
     *xpos = 0;
@@ -257,7 +257,7 @@ glfwGetWindowPos (GLFWwindow* window, int* xpos, int* ypos)
 }
 
 void
-glfwSetWindowPos (GLFWwindow* window, int xpos, int ypos)
+glfwSetWindowPos (GLFWwindow *window, int xpos, int ypos)
 {
   ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
@@ -327,7 +327,7 @@ glfwSetWindowUserPointer (GLFWwindow *window, void *pointer)
 {
   ASSERT_GLFW_INIT_VOID ()
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       window->user_pointer = pointer;
     });
@@ -339,7 +339,7 @@ glfwGetWindowUserPointer (GLFWwindow *window)
   ASSERT_GLFW_INIT (nullptr)
   void *ptr = nullptr;
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       ptr = window->user_pointer;
     });
@@ -360,7 +360,7 @@ glfwRequestWindowAttention (GLFWwindow *window)
 }
 
 void
-glfwSetClipboardString (GLFWwindow *, const char* string)
+glfwSetClipboardString (GLFWwindow *, const char *string)
 {
   ASSERT_GLFW_INIT_VOID ()
   ASSERT_MAIN_THREAD_VOID ()
@@ -530,7 +530,7 @@ glfwWindowShouldClose (GLFWwindow *window)
       return GLFW_TRUE;
     }
 
-  run_on_main_sync ([&]()
+  run_on_main_sync ([&] ()
     {
       val = window->should_close ? GLFW_TRUE : GLFW_FALSE;
     });
@@ -547,7 +547,7 @@ glfwSetWindowShouldClose (GLFWwindow *window, int value)
   if (!window)
     do_error_things (GLFW_INVALID_VALUE, "No window was passed to glfwSetWindowShouldClose");
   else
-    run_on_main_sync ([&]()
+    run_on_main_sync ([&] ()
       {
         window->should_close = (value == GLFW_TRUE) ? true : false;
       });
@@ -605,11 +605,11 @@ glfwCreateWindow (int width, int height,
       SDL_GL_SetAttribute (SDL_GL_CONTEXT_FLAGS, context_flags);
 
       // Bits. max them in case of GLFW_DONT_CARE
-      SDL_GL_SetAttribute (SDL_GL_RED_SIZE,     std::max (0, hints.red_bits));
-      SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE,   std::max (0, hints.green_bits));
-      SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE,    std::max (0, hints.blue_bits));
-      SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE,   std::max (0, hints.alpha_bits));
-      SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE,   std::max (0, hints.depth_bits));
+      SDL_GL_SetAttribute (SDL_GL_RED_SIZE, std::max (0, hints.red_bits));
+      SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, std::max (0, hints.green_bits));
+      SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, std::max (0, hints.blue_bits));
+      SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, std::max (0, hints.alpha_bits));
+      SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, std::max (0, hints.depth_bits));
       SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, std::max (0, hints.stencil_bits));
       SDL_GL_SetAttribute (SDL_GL_MULTISAMPLEBUFFERS, (hints.samples > 0) ? 1 : 0);
       SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, std::max (0, hints.samples));

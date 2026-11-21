@@ -21,7 +21,8 @@ struct GLVersion
 GLVersion
 get_gl_context_version ();
 
-struct ShimGlobalState {
+struct ShimGlobalState
+{
   bool initialized = false;
   bool vulkan_loaded = false;
 
@@ -35,12 +36,13 @@ struct ShimGlobalState {
   GLFWmonitorfun monitor_callback = nullptr;
 
   GLFWwindow *focused_window = nullptr;
-  std::vector <GLFWmonitor *> monitors;
+  std::vector<GLFWmonitor *> monitors;
 };
 
 // https://www.glfw.org/docs/3.3/intro_guide.html#error_handling
 // errors are thread-local.
-struct ShimThreadState {
+struct ShimThreadState
+{
   int last_api_error = GLFW_NO_ERROR;
   std::string last_api_error_ctx;
 };
@@ -55,12 +57,12 @@ run_on_main_sync (Func&& func)
 {
   using FuncType = std::remove_reference_t<Func>;
   return SDL_RunOnMainThread (
-    [](void *userdata) {
-      (*static_cast<FuncType *>(userdata)) ();
+    [] (void *userdata)
+    {
+      (*static_cast<FuncType *> (userdata)) ();
     },
     &func,
-    true
-  );
+    true);
 }
 
 SDL_Surface *
@@ -113,14 +115,13 @@ translate_sdl_keymod_to_glfw (GLFWwindow *window, SDL_Keymod sdl_keymods) noexce
   return mods;
 }
 
-inline
-int sdl_to_glfw_btn[] = {
-    -1,                       // 0 unused
-    GLFW_MOUSE_BUTTON_LEFT,   // 1 SDL_BUTTON_LEFT
-    GLFW_MOUSE_BUTTON_MIDDLE, // 2 SDL_BUTTON_MIDDLE
-    GLFW_MOUSE_BUTTON_RIGHT,  // 3 SDL_BUTTON_RIGHT
-    GLFW_MOUSE_BUTTON_4,      // 4 SDL_BUTTON_X1
-    GLFW_MOUSE_BUTTON_5       // 5 SDL_BUTTON_X2
+inline int sdl_to_glfw_btn[] = {
+  -1,                       // 0 unused
+  GLFW_MOUSE_BUTTON_LEFT,   // 1 SDL_BUTTON_LEFT
+  GLFW_MOUSE_BUTTON_MIDDLE, // 2 SDL_BUTTON_MIDDLE
+  GLFW_MOUSE_BUTTON_RIGHT,  // 3 SDL_BUTTON_RIGHT
+  GLFW_MOUSE_BUTTON_4,      // 4 SDL_BUTTON_X1
+  GLFW_MOUSE_BUTTON_5       // 5 SDL_BUTTON_X2
 };
 
 bool
@@ -134,40 +135,40 @@ assert_glfw_init ();
 
 // main thread
 
-#define ASSERT_MAIN_THREAD(val)\
-  if (!assert_main_thread ())\
+#define ASSERT_MAIN_THREAD(val) \
+  if (!assert_main_thread ()) \
     return val;
 
-#define ASSERT_MAIN_THREAD_VOID()\
-  if (!assert_main_thread ())\
+#define ASSERT_MAIN_THREAD_VOID() \
+  if (!assert_main_thread ()) \
     return;
 
 // glfw init
 
-#define ASSERT_GLFW_INIT(val)\
-  if (!assert_glfw_init ())\
+#define ASSERT_GLFW_INIT(val) \
+  if (!assert_glfw_init ()) \
     return val;
 
-#define ASSERT_GLFW_INIT_VOID()\
-  if (!assert_glfw_init ())\
+#define ASSERT_GLFW_INIT_VOID() \
+  if (!assert_glfw_init ()) \
     return;
 
 // window stuffs
 
-#define ASSERT_VALID_WIN(win, val)\
-  if (!win || !win->sdl_window)\
+#define ASSERT_VALID_WIN(win, val) \
+  if (!win || !win->sdl_window) \
     return val;
 
-#define ASSERT_VALID_WIN_VOID(win)\
-  if (!win || !win->sdl_window)\
+#define ASSERT_VALID_WIN_VOID(win) \
+  if (!win || !win->sdl_window) \
     return;
 
 // funny monitor things
 
-#define ASSERT_VALID_MON(mon, val)\
-  if (!mon || !mon->sdl_displayid)\
+#define ASSERT_VALID_MON(mon, val) \
+  if (!mon || !mon->sdl_displayid) \
     return val;
 
-#define ASSERT_VALID_MON_VOID(mon)\
-  if (!mon || !mon->sdl_displayid)\
+#define ASSERT_VALID_MON_VOID(mon) \
+  if (!mon || !mon->sdl_displayid) \
     return;
